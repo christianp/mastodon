@@ -36,6 +36,7 @@ import {
   COMPOSE_LANGUAGE_CHANGE,
   COMPOSE_COMPOSING_CHANGE,
   COMPOSE_EMOJI_INSERT,
+  COMPOSE_START_LATEX,
   COMPOSE_UPLOAD_CHANGE_REQUEST,
   COMPOSE_UPLOAD_CHANGE_SUCCESS,
   COMPOSE_UPLOAD_CHANGE_FAIL,
@@ -56,6 +57,7 @@ import { STORE_HYDRATE } from '../actions/store';
 import { me } from '../initial_state';
 import { unescapeHTML } from '../utils/html';
 import { uuid } from '../uuid';
+import { tex_to_unicode } from '../features/compose/util/autolatex/autolatex.js';
 
 const initialState = ImmutableMap({
   mounted: 0,
@@ -219,6 +221,23 @@ const insertEmoji = (state, position, emojiData, needsSpace) => {
   });
 };
 
+const startLaTeX = (state, position, latex_style) => {
+  const oldText = state.get('text');
+
+  const latex_styles = {
+    'inline':  { open: '\\(', close: '\\)' },
+    'display': { open: '\\[', close: '\\]' },
+  };
+  const { open, close } = latex_styles[latex_style];
+
+  return state.merge({
+    text: `${oldText.slice(0, position)}${open}  ${close} ${oldText.slice(position)}`,
+    focusDate: new Date(),
+    caretPosition: position + open.length + 1,
+    idempotencyKey: uuid(),
+  });
+};
+
 const privacyPreference = (a, b) => {
   const order = ['public', 'unlisted', 'private', 'direct'];
   return order[Math.max(order.indexOf(a), order.indexOf(b), 0)];
@@ -276,11 +295,19 @@ const mergeLocalHashtagResults = (suggestions, prefix, tagHistory) => {
   return suggestions.map(fixSuggestionCapitalization);
 };
 
-const normalizeSuggestions = (state, { accounts, emojis, tags, token }) => {
+const normalizeSuggestions = (state, { accounts, emojis, tags, latex, token }) => {
   if (accounts) {
     return accounts.map(item => ({ id: item.id, type: 'account' }));
   } else if (emojis) {
     return emojis.map(item => ({ ...item, type: 'emoji' }));
+  } else if (latex) {
+    return latex.flatMap(item => {
+      const o = [{ ...item, type: 'latex' }];
+      if(tex_to_unicode(item.expression) !== undefined) {
+        o.splice(0, 0, { ...item, type: 'unicodemath' });
+      }
+      return o;
+    });
   } else {
     return mergeLocalHashtagResults(sortHashtagsByUse(state, tags.map(item => ({ ...item, type: 'hashtag' }))), token.slice(1), state.get('tagHistory'));
   }
@@ -471,6 +498,8 @@ export default function compose(state = initialState, action) {
     }
   case COMPOSE_EMOJI_INSERT:
     return insertEmoji(state, action.position, action.emoji, action.needsSpace);
+  case COMPOSE_START_LATEX:
+    return startLaTeX(state, action.position, action.latex_style);
   case COMPOSE_UPLOAD_CHANGE_SUCCESS:
     return state
       .set('is_changing_upload', false)

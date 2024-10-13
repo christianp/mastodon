@@ -11,6 +11,8 @@
     - if storage_host?
       %link{ rel: 'dns-prefetch', href: storage_host }/
 
+    %script{ src: '/MathJax/es5/tex-chtml.js' }
+
     = theme_style_tags 'mastodon-light'
     = javascript_pack_tag 'common', integrity: true, crossorigin: 'anonymous'
     = preload_pack_asset "locale/#{I18n.locale}-json.js"

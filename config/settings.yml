@@ -29,6 +29,9 @@ defaults: &defaults
     - administrator
     - mod
     - moderator
+    - math
+    - mathematics
+    - maths
   disallowed_hashtags: # space separated string or list of hashtags without the hash
   bootstrap_timeline_accounts: ''
   activity_api_enabled: true

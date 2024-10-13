@@ -8,6 +8,7 @@ import {
   selectComposeSuggestion,
   changeComposeSpoilerText,
   insertEmojiCompose,
+  startLaTeXCompose,
   uploadCompose,
 } from '../../../actions/compose';
 import ComposeForm from '../components/compose_form';
@@ -63,6 +64,10 @@ const mapDispatchToProps = (dispatch) => ({
 
   onPickEmoji (position, data, needsSpace) {
     dispatch(insertEmojiCompose(position, data, needsSpace));
+  },
+
+  onLaTeXStart (position, data) {
+    dispatch(startLaTeXCompose(position, data));
   },
 
 });

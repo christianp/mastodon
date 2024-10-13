@@ -34,6 +34,9 @@
     = csrf_meta_tags unless skip_csrf_meta_tags?
     %meta{ name: 'style-nonce', content: request.content_security_policy_nonce }
 
+    %script{ src: '/MathJax/config.js' }
+    %script{ src: '/MathJax/es5/tex-chtml.js' }
+
     = stylesheet_link_tag custom_css_path, skip_pipeline: true, host: root_url, media: 'all'
 
     = yield :header_tags
