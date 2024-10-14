@@ -5505,6 +5505,10 @@ a.status-card {
   border-radius: 4px;
   overflow: hidden;
   z-index: 2;
+  width: 20em;
+  max-width: 80svw;
+  left: -10em;
+  padding: 10px;
 
   &.top {
     transform-origin: 50% 100%;
@@ -5530,23 +5534,8 @@ a.status-card {
   cursor: pointer;
   display: flex;
 
-  &:hover,
-  &.active {
-    background: $ui-highlight-color;
-    color: $primary-text-color;
-    outline: 0;
-
-    .latex-dropdown__option__content {
-      color: $primary-text-color;
-
-      strong {
-        color: $primary-text-color;
-      }
-    }
-  }
-
-  &.active:hover {
-    background: lighten($ui-highlight-color, 4%);
+  &:hover {
+    background: var(--dropdown-border-color) ;
   }
 }
 

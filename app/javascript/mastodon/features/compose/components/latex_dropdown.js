@@ -5,7 +5,9 @@ import { defineMessages, injectIntl, FormattedMessage } from 'react-intl';
 
 import classNames from 'classnames';
 
+import LatexIcon from '@/material-icons/400-20px/latex.svg?react';
 import ImmutablePropTypes from 'react-immutable-proptypes';
+import { IconButton } from 'mastodon/components/icon_button';
 
 import { supportsPassiveEvents } from 'detect-passive-events';
 import Overlay from 'react-overlays/Overlay';
@@ -27,7 +29,7 @@ class LaTeXDropdownMenuImpl extends PureComponent {
     style: PropTypes.object,
     onPick: PropTypes.func.isRequired,
     intl: PropTypes.object.isRequired,
-    button: PropTypes.node,
+    pickerButtonRef: PropTypes.object.isRequired,
   };
 
   static defaultProps = {
@@ -35,10 +37,11 @@ class LaTeXDropdownMenuImpl extends PureComponent {
   };
 
   state = {
+    readyToFocus: false,
   };
 
   handleDocumentClick = e => {
-    if (this.node && !this.node.contains(e.target)) {
+    if (this.node && !this.node.contains(e.target) && !this.props.pickerButtonRef.contains(e.target)) {
       this.props.onClose();
     }
   };
@@ -46,6 +49,14 @@ class LaTeXDropdownMenuImpl extends PureComponent {
   componentDidMount () {
     document.addEventListener('click', this.handleDocumentClick, { capture: true });
     document.addEventListener('touchend', this.handleDocumentClick, listenerOptions);
+
+    requestAnimationFrame(() => {
+      this.setState({ readyToFocus: true });
+      if (this.node) {
+        const element = this.node.querySelector('.latex-dropdown__option');
+        if (element) element.focus();
+      }
+    });
   }
 
   componentWillUnmount () {
@@ -121,6 +132,7 @@ class LaTeXDropdown extends PureComponent {
 
   state = {
     active: false,
+    placement: 'bottom',
   };
 
   setRef = (c) => {
@@ -169,27 +181,29 @@ class LaTeXDropdown extends PureComponent {
 
   render () {
     const { container, intl, button, onPickLaTeX } = this.props;
-    const { active } = this.state;
+    const { active, placement } = this.state;
 
     const title = intl.formatMessage(messages.start_latex);
 
     return (
-      <div className='latex-dropdown' onKeyDown={this.handleKeyDown}>
-        <div ref={this.setTargetRef} className='latex-button' title={title} aria-label={title} aria-expanded={active} role='button' onClick={this.onToggle} onKeyDown={this.onToggle} tabIndex={0}>
-          {button || <img
-            className={classNames('latex-icon')}
-            alt='𝑥'
-            src={`${assetHost}/latex/latex-icon.svg`}
-          />}
-        </div>
+      <div className='latex-dropdown' onKeyDown={this.handleKeyDown} ref={this.setTargetRef}>
+        <IconButton
+          title={title}
+          aria-expanded={active}
+          active={active}
+          iconComponent={LatexIcon}
+          onClick={this.onToggle}
+          inverted
+        />
 
-        <Overlay show={active} placement={'bottom'} target={this.findTarget} popperConfig={{ strategy: 'fixed' }}>
+        <Overlay show={active} placement={placement} flip target={this.findTarget} popperConfig={{ strategy: 'fixed', onFirstUpdate: this.handleOverlayEnter }}>
           {({ props, placement })=> (
-            <div {...props} style={{ ...props.style, width: 299 }}>
+            <div {...props} style={{ ...props.style }}>
               <div className={`dropdown-animation ${placement}`}>
                 <LaTeXDropdownMenu
                   onClose={this.onHideDropdown}
                   onPick={onPickLaTeX}
+                  pickerButtonRef={this.target}
                 />
               </div>
             </div>
