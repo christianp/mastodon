@@ -41,9 +41,12 @@ Rails.application.config.content_security_policy do |p|
     vite_public_host = "#{Vite.config.host}:#{Vite.config.port}"
     front_end_build_urls = %w(ws http).map { |protocol| "#{protocol}#{'s' if Vite.config.https?}://#{vite_public_host}" }
 
-    p.connect_src :self, :data, :blob, *media_hosts, Rails.configuration.x.streaming_api_base_url, *front_end_build_urls
-    p.script_src  :self, :unsafe_inline, :unsafe_eval, assets_host
-    p.frame_src   :self, :https, :http
+    p.connect_src :self, :data, :blob, *media_hosts, Rails.configuration.x.streaming_api_base_url
+    p.script_src  :self, assets_host, :unsafe_eval
+    p.style_src   :self, :unsafe_inline
+    p.child_src   :self, :blob, assets_host
+    p.worker_src  :self, :blob, assets_host
+    p.frame_src   :self, :https
     p.style_src   :self, assets_host, :unsafe_inline
   end
 end
