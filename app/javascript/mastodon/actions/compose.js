@@ -9,6 +9,8 @@ import { countableText } from 'mastodon/features/compose/util/counter';
 import { tagHistory } from 'mastodon/settings';
 import { emojiMartSearch } from '@/mastodon/features/emoji/picker';
 
+import { tex_to_unicode } from '../features/compose/util/autolatex/autolatex';
+
 import { showAlert, showAlertForError } from './alerts';
 import { useEmoji } from './emojis';
 import { importFetchedAccounts, importFetchedStatus } from './importer';
@@ -60,6 +62,7 @@ export const COMPOSE_COMPOSING_CHANGE    = 'COMPOSE_COMPOSING_CHANGE';
 export const COMPOSE_LANGUAGE_CHANGE     = 'COMPOSE_LANGUAGE_CHANGE';
 
 export const COMPOSE_EMOJI_INSERT = 'COMPOSE_EMOJI_INSERT';
+export const COMPOSE_START_LATEX  = 'COMPOSE_START_LATEX';
 
 export const COMPOSE_POLL_ADD             = 'COMPOSE_POLL_ADD';
 export const COMPOSE_POLL_REMOVE          = 'COMPOSE_POLL_REMOVE';
@@ -569,6 +572,36 @@ const fetchComposeSuggestionsTags = throttle((dispatch, token) => {
   });
 }, 200, { leading: true, trailing: true });
 
+const fetchComposeSuggestionsLatex = (dispatch, getState, token) => {
+  const start_delimiter = token.slice(0, 2);
+  const end_delimiter = { '\\(': '\\)', '\\[': '\\]' }[start_delimiter];
+  let expression = token.slice(2).replace(/\\[)\]]?$/, '');
+  let brace = 0;
+  for(let i=0;i<expression.length;i++) {
+    switch(expression[i]) {
+    case '\\':
+      i += 1;
+      break;
+    case '{':
+      brace += 1;
+      break;
+    case '}':
+      brace -= 1;
+      break;
+    }
+  }
+  for(;brace<0;brace++) {
+    expression = '{'+expression;
+  }
+  for(;brace>0;brace--) {
+    expression += '}';
+  }
+  const results = [
+    { start_delimiter, end_delimiter, expression },
+  ];
+  dispatch(readyComposeSuggestionsLatex(token, results));
+};
+
 export function fetchComposeSuggestions(token) {
   return (dispatch) => {
     switch (token[0]) {
@@ -579,10 +612,21 @@ export function fetchComposeSuggestions(token) {
     case '＃':
       fetchComposeSuggestionsTags(dispatch, token);
       break;
+    case '\\':
+      fetchComposeSuggestionsLatex(dispatch, getState, token);
+      break;
     default:
       fetchComposeSuggestionsAccounts(dispatch, token);
       break;
     }
+  };
+}
+
+export function readyComposeSuggestionsLatex(token, latex) {
+  return {
+    type: COMPOSE_SUGGESTIONS_READY,
+    token,
+    latex,
   };
 }
 
@@ -631,6 +675,12 @@ export function selectComposeSuggestion(position, token, suggestion, path) {
       startPosition = position - 1;
     } else if (suggestion.type === 'account') {
       completion    = `@${getState().getIn(['accounts', suggestion.id, 'acct'])}`;
+      startPosition = position - 1;
+    } else if (suggestion.type === 'latex') {
+      completion = `${suggestion.start_delimiter}${suggestion.expression}${suggestion.end_delimiter}`;
+      startPosition = position - 1;
+    } else if (suggestion.type === 'unicodemath') {
+      completion = tex_to_unicode(suggestion.expression);
       startPosition = position - 1;
     }
 
@@ -753,6 +803,14 @@ export function insertEmojiCompose(position, emoji, needsSpace) {
     position,
     emoji,
     needsSpace,
+  };
+}
+
+export function startLaTeXCompose(position, latex_style) {
+  return {
+    type: COMPOSE_START_LATEX,
+    position,
+    latex_style,
   };
 }
 

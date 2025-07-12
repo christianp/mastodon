@@ -8,6 +8,7 @@ import {
   selectComposeSuggestion,
   changeComposeSpoilerText,
   insertEmojiCompose,
+  startLaTeXCompose,
   uploadCompose,
 } from 'mastodon/actions/compose';
 import { pasteLinkCompose } from 'mastodon/actions/compose_typed';
@@ -113,6 +114,10 @@ const mapDispatchToProps = (dispatch, props) => ({
 
   onPickEmoji (position, data, needsSpace) {
     dispatch(insertEmojiCompose(position, data, needsSpace));
+  },
+
+  onLaTeXStart (position, data) {
+    dispatch(startLaTeXCompose(position, data));
   },
 
 });
