@@ -111,12 +111,31 @@ class StatusContent extends PureComponent {
     }
   }
 
+  _renderMathJax () {
+    const { status } = this.props;
+    const contentHtml = status.get('contentHtml');
+    if(this.last_contentHtml === contentHtml) {
+      return;
+    }
+    this.last_contentHtml = contentHtml;
+    if(!contentHtml.match(/\\[\(\[]/)) {
+      return;
+    }
+    try {
+      window.MathJax.typeset([this.node]);
+    } catch(e) {
+      console.error(e);
+    }
+  }
+
   componentDidMount () {
     this._updateStatusLinks();
+    this._renderMathJax();
   }
 
   componentDidUpdate () {
     this._updateStatusLinks();
+    this._renderMathJax();
   }
 
   handleMouseDown = (e) => {
