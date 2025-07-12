@@ -16,6 +16,9 @@
     = vite_react_refresh_tag
     = vite_polyfills_tag
     = theme_style_tags 'default'
+
+    %script{ src: '/MathJax/es5/tex-chtml.js' }
+
     = vite_preload_file_tag "mastodon/locales/#{I18n.locale}.json"
     = render_initial_state
     = vite_typescript_tag 'embed.tsx', integrity: true, crossorigin: 'anonymous'
