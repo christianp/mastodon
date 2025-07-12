@@ -172,14 +172,6 @@ class LaTeXDropdown extends PureComponent {
     return this.target;
   };
 
-  setTargetRef = c => {
-    this.target = c;
-  };
-
-  findTarget = () => {
-    return this.target;
-  };
-
   render () {
     const { container, intl, button, onPickLaTeX } = this.props;
     const { active, placement } = this.state;
