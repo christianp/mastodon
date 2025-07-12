@@ -18,6 +18,7 @@ import { Button } from 'mastodon/components/button';
 import { LoadingIndicator } from 'mastodon/components/loading_indicator';
 import EmojiPickerDropdown from '../containers/emoji_picker_dropdown_container';
 import PollButtonContainer from '../containers/poll_button_container';
+import LaTeXDropdown from '../containers/latex_dropdown_container';
 import PrivacyDropdownContainer from '../containers/privacy_dropdown_container';
 import SpoilerButtonContainer from '../containers/spoiler_button_container';
 import UploadButtonContainer from '../containers/upload_button_container';
@@ -66,6 +67,7 @@ class ComposeForm extends ImmutablePureComponent {
     onPaste: PropTypes.func.isRequired,
     onPickEmoji: PropTypes.func.isRequired,
     autoFocus: PropTypes.bool,
+    onLaTeXStart: PropTypes.func.isRequired,
     withoutNavigation: PropTypes.bool,
     anyMedia: PropTypes.bool,
     missingAltText: PropTypes.bool,
@@ -97,6 +99,10 @@ class ComposeForm extends ImmutablePureComponent {
     if (e.keyCode === 13 && (e.ctrlKey || e.metaKey)) {
       this.handleSubmit();
     }
+  };
+
+  handleInput = (e) => {
+    console.log('input');
   };
 
   getFulltextForCharacterCounting = () => {
@@ -226,6 +232,13 @@ class ComposeForm extends ImmutablePureComponent {
     this.props.onPickEmoji(position, data, needsSpace);
   };
 
+  handleLaTeXStart = (data) => {
+    const position = this.textareaRef.current.selectionStart;
+
+    this.props.onLaTeXStart(position, data);
+  };
+
+
   render () {
     const { intl, onPaste, autoFocus, withoutNavigation, maxChars, isSubmitting } = this.props;
     const { highlighted } = this.state;
@@ -275,6 +288,7 @@ class ComposeForm extends ImmutablePureComponent {
               suggestions={this.props.suggestions}
               onFocus={this.handleFocus}
               onKeyDown={this.handleKeyDown}
+              onInput={this.handleInput}
               onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
               onSuggestionsClearRequested={this.onSuggestionsClearRequested}
               onSuggestionSelected={this.onSuggestionSelected}
@@ -299,6 +313,7 @@ class ComposeForm extends ImmutablePureComponent {
                 <PollButtonContainer />
                 <SpoilerButtonContainer />
                 <EmojiPickerDropdown onPickEmoji={this.handleEmojiPick} />
+                <LaTeXDropdown onPickLaTeX={this.handleLaTeXStart} />
                 <CharacterCounter max={maxChars} text={this.getFulltextForCharacterCounting()} />
               </div>
 

@@ -8,6 +8,7 @@ import {
   selectComposeSuggestion,
   changeComposeSpoilerText,
   insertEmojiCompose,
+  startLaTeXCompose,
   uploadCompose,
 } from 'mastodon/actions/compose';
 import { openModal } from 'mastodon/actions/modal';
@@ -77,6 +78,10 @@ const mapDispatchToProps = (dispatch, props) => ({
 
   onPickEmoji (position, data, needsSpace) {
     dispatch(insertEmojiCompose(position, data, needsSpace));
+  },
+
+  onLaTeXStart (position, data) {
+    dispatch(startLaTeXCompose(position, data));
   },
 
 });
