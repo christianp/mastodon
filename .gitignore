@@ -23,6 +23,7 @@
 /public/packs
 /public/packs-dev
 /public/packs-test
+/public/MathJax
 .env
 .env.production
 node_modules/
