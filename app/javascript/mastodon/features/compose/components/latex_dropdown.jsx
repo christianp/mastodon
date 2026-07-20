@@ -13,6 +13,10 @@ import { IconButton } from 'mastodon/components/icon_button';
 import { supportsPassiveEvents } from 'detect-passive-events';
 import Overlay from 'react-overlays/Overlay';
 
+import InlineIcon from '@/latex-icons/inline-mode.svg?react';
+import DisplayIcon from '@/latex-icons/display-mode.svg?react';
+import { Icon } from 'mastodon/components/icon';
+
 import { assetHost } from 'mastodon/utils/config';
 
 const messages = defineMessages({
@@ -89,25 +93,28 @@ class LaTeXDropdownMenuImpl extends PureComponent {
     this.props.onPick(delimiter);
   };
 
+  handleKeyDown = (e, delimiter) => {
+    console.log(e.key);
+    if(e.key == 'Enter') {
+      this.props.onPick(delimiter);
+    }
+  };
+
 
   render () {
     const { intl, style, button, onPick } = this.props;
 
     const items = [
-      { icon: 'inline-mode', value: 'inline', text: intl.formatMessage(messages.inline_short), meta: intl.formatMessage(messages.inline_long) },
-      { icon: 'display-mode', value: 'display', text: intl.formatMessage(messages.display_short), meta: intl.formatMessage(messages.display_long) },
+      { icon: InlineIcon, value: 'inline', text: intl.formatMessage(messages.inline_short), meta: intl.formatMessage(messages.inline_long) },
+      { icon: DisplayIcon, value: 'display', text: intl.formatMessage(messages.display_short), meta: intl.formatMessage(messages.display_long) },
     ];
 
     return (
       <div className={`latex-dropdown__menu`} style={style} ref={this.setRef}>
         {items.map(item => (
-          <div role='option' tabIndex='0' key={item.value} data-index={item.value} onKeyDown={this.handleKeyDown} onClick={(e) => {this.handleClick(item.value, e)}} className={'latex-dropdown__option'}>
+          <div role='option' tabIndex='0' key={item.value} data-index={item.value} onKeyDown={(e) => {this.handleKeyDown(e,item.value)}} onClick={(e) => {this.handleClick(item.value, e)}} className={'latex-dropdown__option'}>
             <div className='latex-dropdown__option__icon'>
-              {button || <img
-                className={'latex-icon'}
-                alt={item.value}
-                src={`${assetHost}/latex/${item.icon}.svg`}
-              />}
+              <Icon icon={item.icon} />
             </div>
 
             <div className='latex-dropdown__option__content'>
@@ -159,7 +166,7 @@ class LaTeXDropdown extends PureComponent {
     }
   };
 
-  handleKeyDown = e => {
+  handleKeyDown = (e) => {
     if (e.key === 'Escape') {
       this.onHideDropdown();
     }
