@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types';
 import { PureComponent } from 'react';
 
-import { defineMessages, injectIntl, FormattedMessage } from 'react-intl';
+import { defineMessages } from 'react-intl';
+import { injectIntl } from '@/mastodon/components/intl';
 
 import classNames from 'classnames';
 
@@ -179,13 +180,14 @@ class LaTeXDropdown extends PureComponent {
     const title = intl.formatMessage(messages.start_latex);
 
     return (
-      <div className='latex-dropdown' onKeyDown={this.handleKeyDown} ref={this.setTargetRef}>
+      <div className='latex-dropdown__dropdown' onKeyDown={this.handleKeyDown} ref={this.setTargetRef}>
         <IconButton
           title={title}
           aria-expanded={active}
           active={active}
           iconComponent={LatexIcon}
           onClick={this.onToggle}
+          id="latex"
           inverted
         />
 
