@@ -27,7 +27,7 @@ export default class AutosuggestLatex extends React.PureComponent {
       <div className='autosuggest-latex' ref={this.setRef}>
         \({latex.expression}\)
         <br />
-        <small>LaTeX code</small>
+        <small class="hint">LaTeX code</small>
       </div>
     );
   }

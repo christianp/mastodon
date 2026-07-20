@@ -21,7 +21,7 @@ export default class AutosuggestUnicodeMath extends React.PureComponent {
       <div className='autosuggest-latex' ref={this.setRef}>
         {unicode}
         <br />
-        <small>Convert to unicode</small>
+        <small class="hint">Convert to unicode</small>
       </div>
     );
   }
