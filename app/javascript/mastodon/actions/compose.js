@@ -572,7 +572,7 @@ const fetchComposeSuggestionsTags = throttle((dispatch, token) => {
   });
 }, 200, { leading: true, trailing: true });
 
-const fetchComposeSuggestionsLatex = (dispatch, getState, token) => {
+const fetchComposeSuggestionsLatex = (dispatch, token) => {
   const start_delimiter = token.slice(0, 2);
   const end_delimiter = { '\\(': '\\)', '\\[': '\\]' }[start_delimiter];
   let expression = token.slice(2).replace(/\\[)\]]?$/, '');
@@ -613,7 +613,7 @@ export function fetchComposeSuggestions(token) {
       fetchComposeSuggestionsTags(dispatch, token);
       break;
     case '\\':
-      fetchComposeSuggestionsLatex(dispatch, getState, token);
+      fetchComposeSuggestionsLatex(dispatch, token);
       break;
     default:
       fetchComposeSuggestionsAccounts(dispatch, token);
