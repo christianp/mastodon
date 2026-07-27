@@ -94,7 +94,6 @@ class LaTeXDropdownMenuImpl extends PureComponent {
   };
 
   handleKeyDown = (e, delimiter) => {
-    console.log(e.key);
     if(e.key == 'Enter') {
       this.props.onPick(delimiter);
     }
