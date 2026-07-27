@@ -120,7 +120,6 @@ class ComposeForm extends ImmutablePureComponent {
   };
 
   handleInput = (e) => {
-    console.log('input');
   };
 
   getFulltextForCharacterCounting = () => {
