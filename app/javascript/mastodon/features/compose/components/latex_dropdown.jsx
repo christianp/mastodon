@@ -11,7 +11,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes';
 import { IconButton } from 'mastodon/components/icon_button';
 
 import { supportsPassiveEvents } from 'detect-passive-events';
-import Overlay from 'react-overlays/Overlay';
+import { Popover } from '@/mastodon/components/popover';
 
 import InlineIcon from '@/latex-icons/inline-mode.svg?react';
 import DisplayIcon from '@/latex-icons/display-mode.svg?react';
@@ -44,12 +44,6 @@ class LaTeXDropdownMenuImpl extends PureComponent {
 
   state = {
     readyToFocus: false,
-  };
-
-  handleDocumentClick = e => {
-    if (this.node && !this.node.contains(e.target) && !this.props.pickerButtonRef.contains(e.target)) {
-      this.props.onClose();
-    }
   };
 
   componentDidMount () {
@@ -140,7 +134,7 @@ class LaTeXDropdown extends PureComponent {
 
   state = {
     active: false,
-    placement: 'bottom',
+    target: null,
   };
 
   setRef = (c) => {
@@ -165,23 +159,13 @@ class LaTeXDropdown extends PureComponent {
     }
   };
 
-  handleKeyDown = (e) => {
-    if (e.key === 'Escape') {
-      this.onHideDropdown();
-    }
-  };
-
   setTargetRef = c => {
-    this.target = c;
-  };
-
-  findTarget = () => {
-    return this.target;
-  };
+    this.setState({ target: c });
+  }
 
   render () {
     const { container, intl, button, onPickLaTeX } = this.props;
-    const { active, placement } = this.state;
+    const { active, target } = this.state;
 
     const title = intl.formatMessage(messages.start_latex);
 
@@ -197,7 +181,11 @@ class LaTeXDropdown extends PureComponent {
           inverted
         />
 
-        <Overlay show={active} placement={placement} flip target={this.findTarget} popperConfig={{ strategy: 'fixed', onFirstUpdate: this.handleOverlayEnter }}>
+        <Popover
+          isOpen={active}
+          reference={target}
+          onClose={this.onHideDropdown}
+        >
           {({ props, placement })=> (
             <div {...props} style={{ ...props.style }}>
               <div className={`dropdown-animation ${placement}`}>
@@ -209,7 +197,7 @@ class LaTeXDropdown extends PureComponent {
               </div>
             </div>
           )}
-        </Overlay>
+        </Popover>
       </div>
     );
   }

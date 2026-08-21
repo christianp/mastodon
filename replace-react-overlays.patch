@@ -1,0 +1,2185 @@
+Commit ID: 296750204abf9ea159395a0c991e7ebd6a445907
+Change ID: lzqpxxutomslsrqqwzupqnqprusqkmux
+Author   : diondiondion <mail@diondiondion.com> (2026-06-26 10:24:51)
+Committer: GitHub <noreply@github.com> (2026-06-26 10:24:51)
+
+    Replace react-overlays with Floating UI (#39621)
+
+Modified regular file app/javascript/mastodon/components/account_header/name.tsx:
+   1     : import { useCallback, useId, useRef, useState } from 'react';
+        1: import { useCallback, useId, useState } from 'react';
+   2    2: import type { FC } from 'react';
+   3    3: 
+   4    4: import { defineMessages, FormattedMessage, useIntl } from 'react-intl';
+   5    5: 
+   6    6: import classNames from 'classnames';
+   7    7: 
+   8     : import Overlay from 'react-overlays/esm/Overlay';
+   9     : 
+  10    8: import { useAccount } from '@/mastodon/hooks/useAccount';
+  11    9: import { useRelationship } from '@/mastodon/hooks/useRelationship';
+  12   10: import { useAppSelector } from '@/mastodon/store';
+    ...
+  20   18: import { DisplayName } from '../display_name';
+  21   19: import { Icon } from '../icon';
+  22   20: import { NavigationFocusTarget } from '../navigation_focus_target';
+       21: import { Popover } from '../popover';
+  23   22: 
+  24   23: import { AccountBadges } from './badges';
+  25   24: import classes from './styles.module.scss';
+    ...
+  82   81:   const accessibilityId = useId();
+  83   82:   const intl = useIntl();
+  84   83:   const [open, setOpen] = useState(false);
+  85     :   const triggerRef = useRef<HTMLButtonElement>(null);
+       84:   const [triggerElement, setTriggerElement] =
+       85:     useState<HTMLButtonElement | null>(null);
+  86   86: 
+  87   87:   const handleClick = useCallback(() => {
+  88   88:     setOpen((prev) => !prev);
+    ...
+  94   94:     <>
+  95   95:       <button
+  96   96:         type='button'
+  97     :         ref={triggerRef}
+       97:         ref={setTriggerElement}
+  98   98:         className={classes.handleHelpButton}
+  99   99:         onClick={handleClick}
+ 100  100:         aria-expanded={open}
+    ...
+ 108  108:         />
+ 109  109:       </button>
+ 110  110: 
+ 111     :       <Overlay
+ 112     :         show={open}
+ 113     :         rootClose
+ 114     :         target={triggerRef as React.RefObject<HTMLButtonElement>}
+ 115     :         onHide={handleClick}
+ 116     :         offset={[5, 5]}
+      111:       <Popover
+      112:         isOpen={open}
+      113:         reference={triggerElement}
+      114:         onClose={handleClick}
+      115:         offset={5}
+ 117  116:       >
+ 118  117:         {({ props }) => (
+ 119  118:           <div
+    ...
+ 192  191:             </CopyButton>
+ 193  192:           </div>
+ 194  193:         )}
+ 195     :       </Overlay>
+      194:       </Popover>
+ 196  195:     </>
+ 197  196:   );
+ 198  197: };
+Modified regular file app/javascript/mastodon/components/alt_text_badge/index.tsx:
+    ...
+   4    4: 
+   5    5: import classNames from 'classnames';
+   6    6: 
+   7     : import type {
+   8     :   OffsetValue,
+   9     :   UsePopperOptions,
+  10     : } from 'react-overlays/esm/usePopper';
+  11     : import Overlay from 'react-overlays/Overlay';
+  12     : 
+  13    7: import CloseIcon from '@/material-icons/400-24px/close.svg?react';
+  14    8: import { useSelectableClick } from 'mastodon/hooks/useSelectableClick';
+  15    9: 
+  16   10: import { IconButton } from '../icon_button';
+       11: import { Popover } from '../popover';
+  17   12: 
+  18   13: import classes from './styles.module.scss';
+  19   14: 
+  20     : const offset = [0, 4] as OffsetValue;
+  21     : const popperConfig = { strategy: 'fixed' } as UsePopperOptions;
+  22     : 
+  23   15: export const AltTextBadge: React.FC<{
+  24   16:   description: string;
+  25   17:   className?: string;
+    ...
+  28   20:   const uniqueId = useId();
+  29   21:   const popoverId = `${uniqueId}-popover`;
+  30   22:   const titleId = `${uniqueId}-title`;
+  31     :   const buttonRef = useRef<HTMLButtonElement>(null);
+       23:   const [buttonElement, setButtonElement] = useState<HTMLButtonElement | null>(
+       24:     null,
+       25:   );
+  32   26:   const popoverRef = useRef<HTMLDivElement>(null);
+  33   27:   const [open, setOpen] = useState(false);
+  34   28: 
+    ...
+  41   35: 
+  42   36:   const handleClose = useCallback(() => {
+  43   37:     setOpen(false);
+  44     :     buttonRef.current?.focus();
+  45     :   }, [setOpen]);
+       38:     buttonElement?.focus();
+       39:   }, [buttonElement]);
+  46   40: 
+  47   41:   const [handleMouseDown, handleMouseUp] = useSelectableClick(handleClose);
+  48   42: 
+  49   43:   return (
+  50   44:     <>
+  51   45:       <button
+  52   46:         type='button'
+  53     :         ref={buttonRef}
+       47:         ref={setButtonElement}
+  54   48:         className={classNames('media-gallery__alt__label', className)}
+  55   49:         onClick={handleClick}
+  56   50:         aria-expanded={open}
+    ...
+  60   54:         ALT
+  61   55:       </button>
+  62   56: 
+  63     :       <Overlay
+  64     :         rootClose
+  65     :         onHide={handleClose}
+  66     :         show={open}
+  67     :         target={buttonRef as React.RefObject<HTMLButtonElement>}
+       57:       <Popover
+       58:         isOpen={open}
+       59:         onClose={handleClose}
+       60:         reference={buttonElement}
+  68   61:         placement='top-end'
+  69     :         flip
+  70     :         offset={offset}
+  71     :         popperConfig={popperConfig}
+       62:         offset={4}
+  72   63:       >
+  73   64:         {({ props }) => (
+  74   65:           <div {...props} className='hover-card-controller'>
+    ...
+ 105   96:             </div>
+ 106   97:           </div>
+ 107   98:         )}
+ 108     :       </Overlay>
+       99:       </Popover>
+ 109  100:     </>
+ 110  101:   );
+ 111  102: };
+Modified regular file app/javascript/mastodon/components/autosuggest_input.jsx:
+    ...
+   5    5: import ImmutablePropTypes from 'react-immutable-proptypes';
+   6    6: import ImmutablePureComponent from 'react-immutable-pure-component';
+   7    7: 
+   8     : import Overlay from 'react-overlays/Overlay';
+   9     : 
+  10    8: import AutosuggestAccountContainer from '../features/compose/containers/autosuggest_account_container';
+  11    9: 
+  12   10: import { AutosuggestEmoji } from './autosuggest_emoji';
+  13   11: import { AutosuggestHashtag } from './autosuggest_hashtag';
+  14   12: import { LocalCustomEmojiProvider } from './emoji/context';
+  15   13: import { textAtCursorMatchesToken } from './autosuggest/utils';
+       14: import { Popover } from './popover';
+  16   15: 
+  17   16: export default class AutosuggestInput extends ImmutablePureComponent {
+  18   17: 
+    ...
+ 129  128:     this.setState({ focused: true });
+ 130  129:   };
+ 131  130: 
+      131:   onCloseMenu = () => {
+      132:     this.setState({ suggestionsHidden: true });
+      133:   };
+      134: 
+ 132  135:   onSuggestionClick = (e) => {
+ 133  136:     const suggestion = this.props.suggestions.get(e.currentTarget.getAttribute('data-index'));
+ 134  137:     e.preventDefault();
+    ...
+ 197  200:         />
+ 198  201: 
+ 199  202:         <LocalCustomEmojiProvider>
+ 200     :           <Overlay show={!(suggestionsHidden || suggestions.isEmpty())} offset={[0, 0]} placement='bottom' target={this.input} popperConfig={{ strategy: 'fixed' }}>
+      203:           <Popover
+      204:             reference={this.input}
+      205:             isOpen={!(suggestionsHidden || suggestions.isEmpty())}
+      206:             onClose={this.onCloseMenu}
+      207:             flip={false}
+      208:           >
+ 201  209:             {({ props }) => (
+ 202  210:               <div {...props}>
+ 203  211:                 <div className='autosuggest-textarea__suggestions' style={{ width: this.input?.clientWidth }}>
+ 204  212:                   {suggestions.map(this.renderSuggestion)}
+ 205  213:                 </div>
+ 206  214:               </div>
+ 207  215:             )}
+ 208     :           </Overlay>
+      216:           </Popover>
+ 209  217:         </LocalCustomEmojiProvider>
+ 210  218:       </div>
+ 211  219:     );
+    ...
+Modified regular file app/javascript/mastodon/components/autosuggest_textarea.jsx:
+    ...
+   5    5: 
+   6    6: import ImmutablePropTypes from 'react-immutable-proptypes';
+   7    7: 
+   8     : import Overlay from 'react-overlays/Overlay';
+   9    8: import Textarea from 'react-textarea-autosize';
+  10    9: 
+  11   10: import AutosuggestAccountContainer from '../features/compose/containers/autosuggest_account_container';
+    ...
+  14   13: import { AutosuggestHashtag } from './autosuggest_hashtag';
+  15   14: import { LocalCustomEmojiProvider } from './emoji/context';
+  16   15: import { textAtCursorMatchesToken } from './autosuggest/utils';
+       16: import { Popover } from './popover';
+  17   17: 
+  18   18: const AutosuggestTextarea = forwardRef(({
+  19   19:   value,
+    ...
+  36   36: 
+  37   37:   const [suggestionsHidden, setSuggestionsHidden] = useState(true);
+  38   38:   const [selectedSuggestion, setSelectedSuggestion] = useState(0);
+       39:   const [textareaElement, setTextareaElement] = useState(null);
+  39   40:   const lastTokenRef = useRef(null);
+  40   41:   const tokenStartRef = useRef(0);
+  41   42: 
+    ...
+ 110  111:     onKeyDown(e);
+ 111  112:   }, [disabled, suggestions, suggestionsHidden, selectedSuggestion, setSelectedSuggestion, setSuggestionsHidden, onSuggestionSelected, onKeyDown]);
+ 112  113: 
+ 113     :   const handleBlur = useCallback(() => {
+      114:   const closeMenu = useCallback(() => {
+ 114  115:     setSuggestionsHidden(true);
+ 115  116:   }, [setSuggestionsHidden]);
+ 116  117: 
+    ...
+ 173  174:     );
+ 174  175:   };
+ 175  176: 
+      177:   const handleRef = useCallback((element) => {
+      178:     textareaRef.current = element;
+      179:     setTextareaElement(element);
+      180:   }, []);
+      181: 
+ 176  182:   return (
+ 177  183:     <div className={classNames('autosuggest-textarea', className)}>
+ 178  184:       <Textarea
+ 179     :         ref={textareaRef}
+      185:         ref={handleRef}
+ 180  186:         className='autosuggest-textarea__textarea'
+ 181  187:         disabled={disabled}
+ 182  188:         placeholder={placeholder}
+    ...
+ 186  192:         onKeyDown={handleKeyDown}
+ 187  193:         onKeyUp={onKeyUp}
+ 188  194:         onFocus={handleFocus}
+ 189     :         onBlur={handleBlur}
+      195:         onBlur={closeMenu}
+ 190  196:         onPaste={handlePaste}
+ 191  197:         onDrop={handleDrop}
+ 192  198:         dir='auto'
+    ...
+ 196  202:       />
+ 197  203: 
+ 198  204:       <LocalCustomEmojiProvider>
+ 199     :         <Overlay show={!(suggestionsHidden || suggestions.isEmpty())} offset={[0, 0]} placement='bottom' target={textareaRef} popperConfig={{ strategy: 'fixed' }}>
+      205:         <Popover
+      206:           matchReferenceWidth
+      207:           isOpen={!(suggestionsHidden || suggestions.isEmpty())}
+      208:           onClose={closeMenu}
+      209:           reference={textareaElement}
+      210:         >
+ 200  211:           {({ props }) => (
+ 201  212:             <div {...props}>
+ 202     :               <div className='autosuggest-textarea__suggestions' style={{ width: textareaRef.current?.clientWidth }}>
+      213:               <div className='autosuggest-textarea__suggestions' style={{ width: textareaElement?.clientWidth }}>
+ 203  214:                 {suggestions.map(renderSuggestion)}
+ 204  215:               </div>
+ 205  216:             </div>
+ 206  217:           )}
+ 207     :         </Overlay>
+      218:         </Popover>
+ 208  219:       </LocalCustomEmojiProvider>
+ 209  220:     </div>
+ 210  221:   );
+    ...
+Modified regular file app/javascript/mastodon/components/dropdown/index.tsx:
+   1     : import { useCallback, useId, useMemo, useRef, useState } from 'react';
+        1: import { useCallback, useId, useMemo, useState } from 'react';
+   2    2: import type { ComponentPropsWithoutRef, FC } from 'react';
+   3    3: 
+   4    4: import { useIntl } from 'react-intl';
+   5    5: import type { MessageDescriptor } from 'react-intl';
+   6    6: 
+   7    7: import classNames from 'classnames';
+   8    8: 
+   9     : import Overlay from 'react-overlays/Overlay';
+  10     : 
+  11    9: import UnfoldMoreIcon from '@/material-icons/400-24px/unfold_more.svg?react';
+  12   10: 
+  13   11: import type { SelectItem } from '../dropdown_selector';
+  14   12: import { DropdownSelector } from '../dropdown_selector';
+  15   13: import { Icon } from '../icon';
+  16     : 
+  17     : import { matchWidth } from './utils';
+       14: import { Popover } from '../popover';
+  18   15: 
+  19   16: interface DropdownProps {
+  20   17:   disabled?: boolean;
+    ...
+  42   39:   ...buttonProps
+  43   40: }) => {
+  44   41:   const intl = useIntl();
+  45     :   const buttonRef = useRef<HTMLButtonElement>(null);
+       42:   const [buttonElement, setButtonElement] = useState<HTMLButtonElement | null>(
+       43:     null,
+       44:   );
+  46   45:   const uniqueId = useId();
+  47   46:   const buttonId = id ?? `${uniqueId}-button`;
+  48   47:   const listboxId = `${uniqueId}-listbox`;
+    ...
+  52   51:   const handleToggle = useCallback(() => {
+  53   52:     if (!disabled) {
+  54   53:       setOpen((prevOpen) => {
+  55     :         buttonRef.current?.focus();
+       54:         buttonElement?.focus();
+  56   55:         return !prevOpen;
+  57   56:       });
+  58   57:     }
+  59     :   }, [disabled]);
+       58:   }, [buttonElement, disabled]);
+  60   59: 
+  61   60:   const handleClose = useCallback(() => {
+  62   61:     setOpen(false);
+  63     :     buttonRef.current?.focus();
+  64     :   }, []);
+       62:     buttonElement?.focus();
+       63:   }, [buttonElement]);
+  65   64: 
+  66   65:   const currentText = useMemo(
+  67   66:     () =>
+    ...
+  93   92:           },
+  94   93:           className,
+  95   94:         )}
+  96     :         ref={buttonRef}
+       95:         ref={setButtonElement}
+  97   96:       >
+  98   97:         {currentText}
+  99   98:         <Icon
+    ...
+ 103  102:         />
+ 104  103:       </button>
+ 105  104: 
+ 106     :       <Overlay
+ 107     :         show={open}
+ 108     :         offset={[0, 0]}
+      105:       <Popover
+      106:         matchReferenceWidth
+      107:         isOpen={open}
+ 109  108:         placement='bottom-start'
+ 110     :         onHide={handleClose}
+ 111     :         flip
+ 112     :         target={buttonRef as React.RefObject<HTMLButtonElement>}
+ 113     :         popperConfig={{
+ 114     :           strategy: 'fixed',
+ 115     :           modifiers: [matchWidth],
+ 116     :         }}
+      109:         onClose={handleClose}
+      110:         reference={buttonElement}
+ 117  111:       >
+ 118  112:         {({ props, placement }) => (
+ 119  113:           <div {...props} className={`${classPrefix}__overlay`}>
+    ...
+ 135  129:             </div>
+ 136  130:           </div>
+ 137  131:         )}
+ 138     :       </Overlay>
+      132:       </Popover>
+ 139  133:     </>
+ 140  134:   );
+ 141  135: };
+Removed regular file app/javascript/mastodon/components/dropdown/utils.ts:
+   1     : import type { Modifier, UsePopperState } from 'react-overlays/esm/usePopper';
+   2     : 
+   3     : export const matchWidth: Modifier<'sameWidth', UsePopperState> = {
+   4     :   name: 'sameWidth',
+   5     :   enabled: true,
+   6     :   phase: 'beforeWrite',
+   7     :   requires: ['computeStyles'],
+   8     :   fn: ({ state }) => {
+   9     :     if (state.styles.popper) {
+  10     :       state.styles.popper.width = `${state.rects.reference.width}px`;
+  11     :     }
+  12     :   },
+  13     :   effect: ({ state }) => {
+  14     :     const reference = state.elements.reference as HTMLElement;
+  15     :     state.elements.popper.style.width = `${reference.offsetWidth}px`;
+  16     :   },
+  17     : };
+Modified regular file app/javascript/mastodon/components/dropdown_menu.tsx:
+    ...
+  13   13: 
+  14   14: import type { Map as ImmutableMap } from 'immutable';
+  15   15: 
+  16     : import type {
+  17     :   OffsetValue,
+  18     :   UsePopperOptions,
+  19     :   Placement,
+  20     : } from 'react-overlays/esm/usePopper';
+  21     : import Overlay from 'react-overlays/Overlay';
+  22     : 
+  23   16: import { fetchRelationships } from 'mastodon/actions/accounts';
+  24   17: import {
+  25   18:   openDropdownMenu,
+    ...
+  40   33: import { Icon } from './icon';
+  41   34: import type { IconProp } from './icon';
+  42   35: import { IconButton } from './icon_button';
+       36: import type { PopoverProps } from './popover';
+       37: import { Popover } from './popover';
+  43   38: 
+  44   39: let id = 0;
+  45   40: 
+    ...
+ 302  297:   title?: string;
+ 303  298:   disabled?: boolean;
+ 304  299:   scrollable?: boolean;
+ 305     :   placement?: Placement;
+ 306     :   offset?: OffsetValue;
+      300:   placement?: PopoverProps['placement'];
+      301:   offset?: PopoverProps['offset'];
+ 307  302:   /**
+ 308  303:    * Prevent the `ScrollableList` with this scrollKey
+ 309  304:    * from being scrolled while the dropdown is open
+    ...
+ 321  316:   onItemClick?: ItemClickFn<Item>;
+ 322  317: }
+ 323  318: 
+ 324     : const popperConfig = { strategy: 'fixed' } as UsePopperOptions;
+ 325     : 
+ 326  319: export const Dropdown = <Item extends object | null = MenuItem>({
+ 327  320:   children,
+ 328  321:   icon,
+    ...
+ 334  327:   disabled,
+ 335  328:   scrollable,
+ 336  329:   placement = 'bottom',
+ 337     :   offset = [5, 5],
+      330:   offset = 5,
+ 338  331:   status,
+ 339  332:   needsStatusRefresh,
+ 340  333:   forceDropdown = false,
+    ...
+ 352  345:   );
+ 353  346:   const [currentId] = useState(id++);
+ 354  347:   const open = currentId === openDropdownId;
+ 355     :   const buttonRef = useRef<HTMLButtonElement>(null);
+      348:   const [buttonElement, setButtonElement] = useState<HTMLButtonElement | null>(
+      349:     null,
+      350:   );
+ 356  351:   const menuId = useId();
+ 357  352:   const prefetchAccountId = status
+ 358  353:     ? status.getIn(['account', 'id'])
+ 359  354:     : undefined;
+ 360  355:   const statusId = status?.get('id') as string | undefined;
+ 361  356: 
+ 362  357:   const handleClose = useCallback(() => {
+ 363     :     if (buttonRef.current) {
+ 364     :       buttonRef.current.focus({ preventScroll: true });
+      358:     if (buttonElement) {
+      359:       buttonElement.focus({ preventScroll: true });
+ 365  360:     }
+ 366  361: 
+ 367  362:     dispatch(
+    ...
+ 372  367:     );
+ 373  368: 
+ 374  369:     dispatch(closeDropdownMenu({ id: currentId }));
+ 375     :   }, [dispatch, currentId]);
+      370:   }, [buttonElement, dispatch, currentId]);
+ 376  371: 
+ 377  372:   const handleItemClick = useCallback(
+ 378  373:     (e: React.MouseEvent) => {
+    ...
+ 489  484:     onBlur: unsetIsKeypress,
+ 490  485:     'aria-expanded': open,
+ 491  486:     'aria-controls': menuId,
+ 492     :     ref: buttonRef,
+      487:     ref: setButtonElement,
+ 493  488:   };
+ 494  489: 
+ 495  490:   if (children) {
+    ...
+ 513  508:     <>
+ 514  509:       {button}
+ 515  510: 
+ 516     :       <Overlay
+ 517     :         show={open}
+      511:       <Popover
+      512:         isOpen={open}
+      513:         onClose={handleClose}
+ 518  514:         offset={offset}
+ 519  515:         placement={placement}
+ 520     :         flip
+ 521     :         target={buttonRef as React.RefObject<HTMLButtonElement>}
+ 522     :         popperConfig={popperConfig}
+      516:         reference={buttonElement}
+ 523  517:       >
+ 524     :         {({ props, arrowProps, placement }) => (
+      518:         {({ props, placement }) => (
+ 525  519:           <div {...props} className={className} id={menuId}>
+ 526  520:             <div className={`dropdown-animation dropdown-menu ${placement}`}>
+ 527     :               <div
+ 528     :                 className={`dropdown-menu__arrow ${placement}`}
+ 529     :                 {...arrowProps}
+ 530     :               />
+ 531     : 
+ 532  521:               <DropdownMenu
+ 533  522:                 items={items}
+ 534  523:                 loading={loading}
+    ...
+ 542  531:             </div>
+ 543  532:           </div>
+ 544  533:         )}
+ 545     :       </Overlay>
+      534:       </Popover>
+ 546  535:     </>
+ 547  536:   );
+ 548  537: };
+Modified regular file app/javascript/mastodon/components/form_fields/combobox_field.tsx:
+    ...
+  14   14: 
+  15   15: import classNames from 'classnames';
+  16   16: 
+  17     : import Overlay from 'react-overlays/Overlay';
+  18     : 
+  19   17: import KeyboardArrowDownIcon from '@/material-icons/400-24px/keyboard_arrow_down.svg?react';
+  20   18: import KeyboardArrowUpIcon from '@/material-icons/400-24px/keyboard_arrow_up.svg?react';
+  21   19: import SearchIcon from '@/material-icons/400-24px/search.svg?react';
+  22     : import { matchWidth } from 'mastodon/components/dropdown/utils';
+  23   20: import { IconButton } from 'mastodon/components/icon_button';
+  24     : import { useOnClickOutside } from 'mastodon/hooks/useOnClickOutside';
+  25   21: 
+  26   22: import { LoadingIndicator } from '../loading_indicator';
+       23: import { Popover } from '../popover';
+  27   24: 
+  28   25: import classes from './combobox.module.scss';
+  29   26: import { FormFieldWrapper } from './form_field_wrapper';
+    ...
+ 236  233: ) => {
+ 237  234:   const intl = useIntl();
+ 238  235:   const wrapperRef = useRef<HTMLDivElement>(null);
+ 239     :   const inputRef = useRef<HTMLInputElement>(null);
+ 240     :   const popoverRef = useRef<HTMLDivElement>(null);
+      236:   const [inputElement, setInputElement] = useState<HTMLInputElement | null>(
+      237:     null,
+      238:   );
+      239:   const [popoverElement, setPopoverElement] = useState<HTMLDivElement | null>(
+      240:     null,
+      241:   );
+ 241  242: 
+ 242  243:   // This ref tracks whether the menu was just closed following a
+ 243  244:   // selection, and prevents the menu from re-opening again
+    ...
+ 275  276: 
+ 276  277:   const openMenu = useCallback(() => {
+ 277  278:     setShouldMenuOpen(true);
+ 278     :     inputRef.current?.focus();
+ 279     :   }, []);
+      279:     inputElement?.focus();
+      280:   }, [inputElement]);
+ 280  281: 
+ 281  282:   const closeMenu = useCallback(() => {
+ 282  283:     setShouldMenuOpen(false);
+ 283  284:   }, []);
+ 284  285: 
+ 285     :   const highlightItem = useCallback((id: string | null) => {
+ 286     :     setHighlightedItemId(id);
+ 287     :     if (id) {
+ 288     :       const itemElement = popoverRef.current?.querySelector<HTMLLIElement>(
+ 289     :         `[data-item-id='${id}']`,
+ 290     :       );
+ 291     :       if (itemElement && popoverRef.current) {
+ 292     :         scrollItemIntoView(itemElement, popoverRef.current);
+      286:   const highlightItem = useCallback(
+      287:     (id: string | null) => {
+      288:       setHighlightedItemId(id);
+      289:       if (id) {
+      290:         const itemElement = popoverElement?.querySelector<HTMLLIElement>(
+      291:           `[data-item-id='${id}']`,
+      292:         );
+      293:         if (itemElement && popoverElement) {
+      294:           scrollItemIntoView(itemElement, popoverElement);
+      295:         }
+ 293  296:       }
+ 294     :     }
+ 295     :   }, []);
+      297:     },
+      298:     [popoverElement],
+      299:   );
+ 296  300: 
+ 297  301:   const resetHighlight = useCallback(() => {
+ 298  302:     const firstItem = flatItems[0];
+    ...
+ 353  357:           }
+ 354  358:         }
+ 355  359:       }
+ 356     :       inputRef.current?.focus();
+      360:       inputElement?.focus();
+ 357  361:     },
+ 358     :     [closeMenu, closeOnSelect, getIsItemDisabled, flatItems, onSelectItem],
+      362:     [
+      363:       flatItems,
+      364:       inputElement,
+      365:       getIsItemDisabled,
+      366:       onSelectItem,
+      367:       closeOnSelect,
+      368:       closeMenu,
+      369:     ],
+ 359  370:   );
+ 360  371: 
+ 361  372:   const handleSelectItem = useCallback(
+    ...
+ 406  417:     [getItemId, highlightItem, highlightedItemId, flatItems],
+ 407  418:   );
+ 408  419: 
+ 409     :   useOnClickOutside(wrapperRef, closeMenu);
+ 410     : 
+ 411  420:   const handleInputKeyDown = useCallback(
+ 412  421:     (e: React.KeyboardEvent<HTMLInputElement>) => {
+ 413  422:       onKeyDown?.(e);
+    ...
+ 489  498:       );
+ 490  499:     });
+ 491  500: 
+ 492     :   const mergeRefs = useCallback(
+      501:   const mergeInputRefs = useCallback(
+ 493  502:     (element: HTMLInputElement | null) => {
+ 494     :       inputRef.current = element;
+      503:       setInputElement(element);
+ 495  504:       if (typeof ref === 'function') {
+ 496  505:         ref(element);
+ 497  506:       } else if (ref) {
+    ...
+ 525  534:         onKeyDown={handleInputKeyDown}
+ 526  535:         icon={icon ?? undefined}
+ 527  536:         className={classNames(classes.input, className)}
+ 528     :         ref={mergeRefs}
+      537:         ref={mergeInputRefs}
+ 529  538:       />
+ 530  539:       {hasMenuContent && (
+ 531  540:         <IconButton
+    ...
+ 551  560:       <span role='status' aria-live='polite' className='sr-only'>
+ 552  561:         {isMenuOpen && statusMessage}
+ 553  562:       </span>
+ 554     :       <Overlay
+ 555     :         show={isMenuOpen}
+ 556     :         offset={[0, 1]}
+      563:       <Popover
+      564:         matchReferenceWidth
+      565:         isOpen={isMenuOpen}
+      566:         onClose={closeMenu}
+      567:         offset={1}
+ 557  568:         placement='bottom-start'
+ 558     :         onHide={closeMenu}
+ 559     :         ref={popoverRef}
+ 560     :         target={inputRef as React.RefObject<HTMLInputElement>}
+ 561     :         container={wrapperRef as React.RefObject<HTMLDivElement>}
+ 562     :         popperConfig={{
+ 563     :           modifiers: [matchWidth],
+ 564     :         }}
+      569:         strategy='absolute'
+      570:         popoverElement={popoverElement}
+      571:         reference={inputElement}
+      572:         container={null}
+ 565  573:       >
+ 566  574:         {({ props, placement }) => (
+ 567     :           <div {...props} className={classNames(classes.popover, placement)}>
+      575:           <div
+      576:             {...props}
+      577:             ref={setPopoverElement}
+      578:             className={classNames(classes.popover, placement)}
+      579:           >
+ 568  580:             <StatusMessageWrapper
+ 569  581:               showStatus={showStatusMessageInMenu}
+ 570  582:               isLoading={isLoading}
+    ...
+ 608  620:             </StatusMessageWrapper>
+ 609  621:           </div>
+ 610  622:         )}
+ 611     :       </Overlay>
+      623:       </Popover>
+ 612  624:     </div>
+ 613  625:   );
+ 614  626: };
+    ...
+Modified regular file app/javascript/mastodon/components/hover_card_controller.tsx:
+   1    1: import { useEffect, useRef, useState, useCallback } from 'react';
+   2    2: 
+   3    3: import { useLocation } from 'react-router-dom';
+   4    4: 
+   5     : import type {
+   6     :   OffsetValue,
+   7     :   UsePopperOptions,
+   8     : } from 'react-overlays/esm/usePopper';
+   9     : import Overlay from 'react-overlays/Overlay';
+  10     : 
+  11    5: import { HoverCardAccount } from 'mastodon/components/hover_card_account';
+        6: import type { PopoverProps } from 'mastodon/components/popover';
+        7: import { Popover } from 'mastodon/components/popover';
+  12    8: import { useTimeout } from 'mastodon/hooks/useTimeout';
+  13    9: 
+  14     : const offset = [-12, 4] as OffsetValue;
+       10: const offset: PopoverProps['offset'] = { crossAxis: -12, mainAxis: 4 } as const;
+  15   11: const enterDelay = 750;
+  16   12: const leaveDelay = 150;
+  17   13: // Only open the card if the mouse was moved within this time,
+  18   14: // to avoid triggering the card without intentional mouse movement
+  19   15: // (e.g. when content changed underneath the mouse cursor)
+  20   16: const activeMovementThreshold = 150;
+  21     : const popperConfig = { strategy: 'fixed' } as UsePopperOptions;
+  22   17: 
+  23   18: const isHoverCardAnchor = (element: HTMLElement) =>
+  24   19:   element.matches('[data-hover-card-account]');
+    ...
+ 212  207:   ]);
+ 213  208: 
+ 214  209:   return (
+ 215     :     <Overlay
+ 216     :       rootClose
+ 217     :       onHide={handleClose}
+ 218     :       show={open}
+ 219     :       target={anchor}
+      210:     <Popover
+      211:       onClose={handleClose}
+      212:       isOpen={open}
+      213:       reference={anchor}
+ 220  214:       placement='bottom-start'
+ 221     :       flip
+ 222  215:       offset={offset}
+ 223     :       popperConfig={popperConfig}
+ 224  216:     >
+ 225  217:       {({ props }) => (
+ 226  218:         <div {...props} className='hover-card-controller'>
+ 227  219:           <HoverCardAccount accountId={accountId} ref={cardRef} />
+ 228  220:         </div>
+ 229  221:       )}
+ 230     :     </Overlay>
+      222:     </Popover>
+ 231  223:   );
+ 232  224: };
+Modified regular file app/javascript/mastodon/components/learn_more_link.tsx:
+   1     : import { useState, useRef, useCallback, useId } from 'react';
+        1: import { useState, useCallback, useId } from 'react';
+   2    2: 
+   3    3: import { FormattedMessage } from 'react-intl';
+   4    4: 
+   5     : import Overlay from 'react-overlays/Overlay';
+        5: import { Popover } from './popover';
+   6    6: 
+   7    7: export const LearnMoreLink: React.FC<{ children: React.ReactNode }> = ({
+   8    8:   children,
+   9    9: }) => {
+  10   10:   const accessibilityId = useId();
+  11   11:   const [open, setOpen] = useState(false);
+  12     :   const triggerRef = useRef<HTMLButtonElement>(null);
+       12:   const [trigger, setTrigger] = useState<HTMLButtonElement | null>(null);
+  13   13: 
+  14   14:   const handleClick = useCallback(() => {
+  15   15:     setOpen(!open);
+    ...
+  19   19:     <>
+  20   20:       <button
+  21   21:         className='link-button'
+  22     :         ref={triggerRef}
+       22:         ref={setTrigger}
+  23   23:         onClick={handleClick}
+  24   24:         aria-expanded={open}
+  25   25:         aria-controls={accessibilityId}
+    ...
+  31   31:         />
+  32   32:       </button>
+  33   33: 
+  34     :       <Overlay
+  35     :         show={open}
+  36     :         rootClose
+  37     :         onHide={handleClick}
+  38     :         offset={[5, 5]}
+       34:       <Popover
+       35:         isOpen={open}
+       36:         onClose={handleClick}
+       37:         offset={5}
+  39   38:         placement='bottom-end'
+  40     :         target={triggerRef as React.RefObject<HTMLButtonElement>}
+       39:         reference={trigger}
+  41   40:       >
+  42   41:         {({ props }) => (
+  43   42:           <div
+    ...
+  62   61:             </div>
+  63   62:           </div>
+  64   63:         )}
+  65     :       </Overlay>
+       64:       </Popover>
+  66   65:     </>
+  67   66:   );
+  68   67: };
+Added regular file app/javascript/mastodon/components/popover/index.tsx:
+        1: import { useEffect } from 'react';
+        2: 
+        3: import type {
+        4:   ReferenceType,
+        5:   Placement,
+        6:   OffsetOptions,
+        7:   Strategy,
+        8: } from '@floating-ui/react-dom';
+        9: import {
+       10:   useFloating,
+       11:   autoUpdate,
+       12:   inline,
+       13:   offset as offsetMiddleware,
+       14:   shift,
+       15:   flip as flipMiddleware,
+       16:   size,
+       17:   hide,
+       18: } from '@floating-ui/react-dom';
+       19: 
+       20: import { useOnClickOutside } from '@/mastodon/hooks/useOnClickOutside';
+       21: 
+       22: import { Portal } from './portal';
+       23: 
+       24: export interface PopoverProps {
+       25:   /**
+       26:    * Set the visibility of the popover
+       27:    */
+       28:   isOpen?: boolean;
+       29:   /**
+       30:    * Callback triggered when the popover needs to be closed
+       31:    * (e.g. because the Esc key was pressed).
+       32:    */
+       33:   onClose: (e: Event) => void;
+       34:   /**
+       35:    * Pass an element that the popover should be attached to.
+       36:    * Must come from `useState`, not `useRef`.
+       37:    */
+       38:   reference: ReferenceType | null;
+       39:   /**
+       40:    * Pass the popover element (useful if you also need the element
+       41:    * in the parent and already have it in state).
+       42:    * Must come from `useState`, not `useRef`.
+       43:    */
+       44:   popoverElement?: HTMLElement | null;
+       45:   /**
+       46:    * Control which element the popover will be rendered into.
+       47:    * Passing `null` will render the popover in place.
+       48:    */
+       49:   container?: HTMLElement | null;
+       50:   /**
+       51:    * Control where the overlay element is positioned in relation
+       52:    * to the reference element
+       53:    */
+       54:   placement?: Placement;
+       55:   /**
+       56:    * Control the distance between popover and reference
+       57:    */
+       58:   offset?: OffsetOptions;
+       59:   /**
+       60:    * Allow the popover to flip to the other side of the reference
+       61:    * if there's no room in the specified direction. Enabled by default.
+       62:    */
+       63:   flip?: boolean;
+       64:   /**
+       65:    * Change the positioning strategy, defaults to 'fixed'
+       66:    * but can be changed to 'absolute'
+       67:    */
+       68:   strategy?: Strategy;
+       69:   /**
+       70:    * Adapt the popover's width to match that of the reference,
+       71:    * useful when attached to text input.
+       72:    */
+       73:   matchReferenceWidth?: boolean;
+       74:   /**
+       75:    * Control whether to close the popover when clicking outside
+       76:    * of it (enabled by default).
+       77:    */
+       78:   closeOnClickOutside?: boolean;
+       79:   /**
+       80:    * Render prop that must return the popover element.
+       81:    */
+       82:   children: (value: {
+       83:     /**
+       84:      * The popover's final computed placement. Can be used to
+       85:      * adjust the popover's style based on its position.
+       86:      */
+       87:     placement: Placement | undefined;
+       88:     /**
+       89:      * Re-computes the popover's position – call this when an
+       90:      * action inside of the popover has changed its size.
+       91:      */
+       92:     update: () => void;
+       93:     /**
+       94:      * These props must be passed to the popover element to
+       95:      * enable it to be sized and positioned. The `ref` prop
+       96:      * is not passed when the `popoverElement` prop is provided.
+       97:      */
+       98:     props: Record<string, unknown> & {
+       99:       ref?: React.RefCallback<HTMLElement>;
+      100:       style: React.CSSProperties;
+      101:     };
+      102:   }) => React.ReactNode;
+      103: }
+      104: 
+      105: export const Popover: React.FC<PopoverProps> = ({
+      106:   isOpen,
+      107:   onClose,
+      108:   reference,
+      109:   popoverElement,
+      110:   placement = 'bottom',
+      111:   offset,
+      112:   strategy = 'fixed',
+      113:   flip = true,
+      114:   container,
+      115:   matchReferenceWidth = false,
+      116:   closeOnClickOutside = true,
+      117:   children,
+      118: }) => {
+      119:   const {
+      120:     placement: computedPlacement,
+      121:     update,
+      122:     refs,
+      123:     floatingStyles,
+      124:     middlewareData,
+      125:     elements,
+      126:   } = useFloating({
+      127:     elements: {
+      128:       reference,
+      129:       floating: popoverElement,
+      130:     },
+      131:     placement,
+      132:     strategy,
+      133:     whileElementsMounted: autoUpdate,
+      134:     middleware: [
+      135:       offsetMiddleware(offset),
+      136:       inline(),
+      137:       shift(),
+      138:       flip ? flipMiddleware() : null,
+      139:       matchReferenceWidth
+      140:         ? size({
+      141:             apply({ rects, elements }) {
+      142:               Object.assign(elements.floating.style, {
+      143:                 minWidth: `${rects.reference.width}px`,
+      144:               });
+      145:             },
+      146:           })
+      147:         : null,
+      148:       hide(),
+      149:     ],
+      150:   });
+      151: 
+      152:   // Close when clicking outside the popover
+      153:   useOnClickOutside(
+      154:     [
+      155:       elements.floating,
+      156:       // Only pass reference if it's not a "virtual element"
+      157:       elements.reference instanceof Element ? elements.reference : null,
+      158:     ],
+      159:     (e) => {
+      160:       onClose(e);
+      161:     },
+      162:     isOpen && closeOnClickOutside,
+      163:   );
+      164: 
+      165:   // Close when pressing Escape
+      166:   useEffect(() => {
+      167:     if (!isOpen) {
+      168:       return () => null;
+      169:     }
+      170: 
+      171:     function closeOnEscape(event: KeyboardEvent) {
+      172:       if (event.key === 'Escape') {
+      173:         onClose(event);
+      174:       }
+      175:     }
+      176: 
+      177:     document.addEventListener('keyup', closeOnEscape);
+      178: 
+      179:     return () => {
+      180:       document.removeEventListener('keyup', closeOnEscape);
+      181:     };
+      182:   }, [isOpen, onClose]);
+      183: 
+      184:   if (!isOpen) {
+      185:     return null;
+      186:   }
+      187: 
+      188:   return (
+      189:     <Portal container={container}>
+      190:       {children({
+      191:         placement: computedPlacement,
+      192:         update,
+      193:         props: {
+      194:           ref: popoverElement ? undefined : refs.setFloating,
+      195:           style: floatingStyles,
+      196:           'data-popover-placement': computedPlacement,
+      197:           'data-popover-reference-hidden': middlewareData.hide?.referenceHidden,
+      198:           'data-popover-escaped': middlewareData.hide?.escaped,
+      199:         },
+      200:       })}
+      201:     </Portal>
+      202:   );
+      203: };
+Added regular file app/javascript/mastodon/components/popover/portal.tsx:
+        1: import { createPortal } from 'react-dom';
+        2: 
+        3: interface PortalProps {
+        4:   /**
+        5:    * The element to render the Portal's children into.
+        6:    * Must be an object, e.g. the result of a getElementById() call.
+        7:    * Set to `null` to render the children in place,
+        8:    * i.e. effectively disable the Portal's functionality
+        9:    */
+       10:   readonly container?: HTMLElement | SVGElement | null;
+       11:   readonly children?: React.ReactNode;
+       12: }
+       13: 
+       14: export const Portal: React.FC<PortalProps> = ({
+       15:   container,
+       16:   children,
+       17: }: PortalProps) => {
+       18:   if (container === null) return children;
+       19: 
+       20:   return createPortal(children, container ?? document.body);
+       21: };
+Modified regular file app/javascript/mastodon/components/status/boost_button.tsx:
+    ...
+ 187  187:   return (
+ 188  188:     <Dropdown
+ 189  189:       placement='bottom-start'
+ 190     :       offset={[-19, 5]} // This aligns button icon with menu icons
+      190:       offset={{ mainAxis: 5, crossAxis: -19 }} // This aligns button icon with menu icons
+ 191  191:       items={items}
+ 192  192:       renderItem={renderMenuItem}
+ 193  193:       onOpen={handleDropdownOpen}
+    ...
+Modified regular file app/javascript/mastodon/components/status_action_bar/remove_quote_hint.tsx:
+   1     : import { useEffect, useRef, useState, useId } from 'react';
+        1: import { useEffect, useState, useId } from 'react';
+   2    2: 
+   3    3: import { FormattedMessage, useIntl } from 'react-intl';
+   4    4: 
+   5    5: import classNames from 'classnames';
+   6    6: 
+   7     : import Overlay from 'react-overlays/Overlay';
+   8     : 
+   9    7: import { useDismissible } from '@/mastodon/hooks/useDismissible';
+  10    8: import MoreHorizIcon from '@/material-icons/400-24px/more_horiz.svg?react';
+  11    9: 
+  12   10: import { Button } from '../button';
+  13   11: import { Icon } from '../icon';
+       12: import { Popover } from '../popover';
+  14   13: 
+  15   14: import classes from './remove_quote_hint.module.css';
+  16   15: 
+    ...
+  28   27:   className?: string;
+  29   28:   children: (dismiss: () => void) => React.ReactNode;
+  30   29: }> = ({ canShowHint, className, children }) => {
+  31     :   const anchorRef = useRef<HTMLDivElement>(null);
+       30:   const [anchorElement, setAnchorElement] = useState<HTMLDivElement | null>(
+       31:     null,
+       32:   );
+  32   33:   const intl = useIntl();
+  33   34: 
+  34   35:   const { wasDismissed, dismiss } = useDismissible(DISMISSIBLE_BANNER_ID);
+    ...
+  57   58:   }, [shouldShowHint, uniqueId]);
+  58   59: 
+  59   60:   return (
+  60     :     <div className={className} ref={anchorRef}>
+       61:     <div className={className} ref={setAnchorElement}>
+  61   62:       {children(dismiss)}
+  62   63:       {shouldShowHint && isOnlyHint && (
+  63     :         <Overlay
+  64     :           show
+  65     :           flip
+  66     :           offset={[12, 10]}
+       64:         <Popover
+       65:           isOpen
+       66:           offset={{ mainAxis: 10, crossAxis: 12 }}
+  67   67:           placement='bottom-end'
+  68     :           target={anchorRef as React.RefObject<HTMLDivElement>}
+  69     :           container={anchorRef as React.RefObject<HTMLDivElement>}
+       68:           reference={anchorElement}
+       69:           container={anchorElement}
+       70:           onClose={dismiss}
+  70   71:         >
+  71   72:           {({ props, placement }) => (
+  72   73:             <div
+    ...
+ 113  114:               </FormattedMessage>
+ 114  115:             </div>
+ 115  116:           )}
+ 116     :         </Overlay>
+      117:         </Popover>
+ 117  118:       )}
+ 118  119:     </div>
+ 119  120:   );
+ 120  121: };
+Modified regular file app/javascript/mastodon/features/account_edit/components/image_edit.tsx:
+    ...
+   5    5: 
+   6    6: import classNames from 'classnames';
+   7    7: 
+   8     : import type { OffsetValue } from 'react-overlays/esm/usePopper';
+   9     : 
+  10    8: import type { ModalType } from '@/mastodon/actions/modal';
+  11    9: import { openModal } from '@/mastodon/actions/modal';
+  12   10: import { Dropdown } from '@/mastodon/components/dropdown_menu';
+    ...
+ 118  116:     <Dropdown
+ 119  117:       items={items}
+ 120  118:       placement={location === 'header' ? 'bottom-end' : 'bottom-start'}
+ 121     :       offset={popperOffset}
+      119:       offset={6}
+ 122  120:       className={classes.imageMenu}
+ 123  121:       icon='camera'
+ 124  122:       title={intl.formatMessage(messages.replace)}
+    ...
+ 127  125:     />
+ 128  126:   );
+ 129  127: };
+ 130     : 
+ 131     : const popperOffset = [0, 6] as OffsetValue;
+Modified regular file app/javascript/mastodon/features/account_timeline/components/filters.tsx:
+   1     : import { useCallback, useId, useRef, useState } from 'react';
+        1: import { useCallback, useId, useState } from 'react';
+   2    2: import type { ChangeEventHandler, FC } from 'react';
+   3    3: 
+   4    4: import { FormattedMessage } from 'react-intl';
+   5    5: 
+   6    6: import { useParams } from 'react-router';
+   7    7: 
+   8     : import Overlay from 'react-overlays/esm/Overlay';
+   9     : 
+  10    8: import { AccountTabs } from '@/mastodon/components/account_header/tabs';
+  11    9: import { Toggle } from '@/mastodon/components/form_fields';
+  12   10: import { Icon } from '@/mastodon/components/icon';
+       11: import { Popover } from '@/mastodon/components/popover';
+  13   12: import KeyboardArrowDownIcon from '@/material-icons/400-24px/keyboard_arrow_down.svg?react';
+  14   13: 
+  15   14: import { useAccountContext } from '../hooks/useAccountContext';
+    ...
+  32   31: 
+  33   32: const FilterDropdown: FC = () => {
+  34   33:   const [open, setOpen] = useState(false);
+  35     :   const buttonRef = useRef<HTMLButtonElement>(null);
+       34:   const [buttonElement, setButtonElement] = useState<HTMLButtonElement | null>(
+       35:     null,
+       36:   );
+  36   37: 
+  37   38:   const handleClick = useCallback(() => {
+  38     :     setOpen(true);
+       39:     setOpen((prev) => !prev);
+  39   40:   }, []);
+  40   41:   const handleHide = useCallback(() => {
+  41   42:     setOpen(false);
+    ...
+  55   56:   );
+  56   57: 
+  57   58:   const accessibleId = useId();
+  58     :   const containerRef = useRef<HTMLDivElement>(null);
+  59   59: 
+  60   60:   return (
+  61     :     <div ref={containerRef}>
+       61:     <div>
+  62   62:       <button
+  63   63:         type='button'
+  64   64:         className={classes.filterSelectButton}
+  65     :         ref={buttonRef}
+       65:         ref={setButtonElement}
+  66   66:         onClick={handleClick}
+  67   67:         aria-expanded={open}
+  68   68:         aria-controls={`${accessibleId}-wrapper`}
+    ...
+  97   97:           className={classes.filterSelectIcon}
+  98   98:         />
+  99   99:       </button>
+ 100     :       <Overlay
+ 101     :         show={open}
+ 102     :         target={buttonRef as React.RefObject<HTMLButtonElement>}
+      100:       <Popover
+      101:         isOpen={open}
+      102:         reference={buttonElement}
+ 103  103:         placement='bottom-start'
+ 104     :         rootClose
+ 105     :         onHide={handleHide}
+ 106     :         container={containerRef as React.RefObject<HTMLDivElement>}
+      104:         onClose={handleHide}
+      105:         strategy='absolute'
+      106:         container={null}
+ 107  107:       >
+ 108  108:         {({ props }) => (
+ 109  109:           <div
+    ...
+ 138  138:             />
+ 139  139:           </div>
+ 140  140:         )}
+ 141     :       </Overlay>
+      141:       </Popover>
+ 142  142:     </div>
+ 143  143:   );
+ 144  144: };
+Modified regular file app/javascript/mastodon/features/alt_text_modal/components/info_button.tsx:
+   1     : import { useState, useRef, useCallback, useId } from 'react';
+        1: import { useState, useCallback, useId } from 'react';
+   2    2: 
+   3    3: import { FormattedMessage, useIntl, defineMessages } from 'react-intl';
+   4    4: 
+   5    5: import classNames from 'classnames';
+   6    6: 
+   7     : import Overlay from 'react-overlays/Overlay';
+   8     : 
+        7: import { Popover } from '@/mastodon/components/popover';
+   9    8: import QuestionMarkIcon from '@/material-icons/400-24px/question_mark.svg?react';
+  10    9: import { Icon } from 'mastodon/components/icon';
+  11   10: import { useSelectableClick } from 'mastodon/hooks/useSelectableClick';
+    ...
+  17   16: export const InfoButton: React.FC = () => {
+  18   17:   const intl = useIntl();
+  19   18:   const [open, setOpen] = useState(false);
+  20     :   const triggerRef = useRef<HTMLButtonElement>(null);
+       19:   const [trigger, setTrigger] = useState<HTMLButtonElement | null>(null);
+  21   20:   const accessibilityId = useId();
+  22   21: 
+  23   22:   const handleClick = useCallback(() => {
+    ...
+  31   30:       <button
+  32   31:         type='button'
+  33   32:         className={classNames('help-button', { active: open })}
+  34     :         ref={triggerRef}
+       33:         ref={setTrigger}
+  35   34:         onClick={handleClick}
+  36   35:         aria-expanded={open}
+  37   36:         aria-controls={accessibilityId}
+    ...
+  40   39:         <Icon id='' icon={QuestionMarkIcon} />
+  41   40:       </button>
+  42   41: 
+  43     :       <Overlay
+  44     :         show={open}
+  45     :         rootClose
+       42:       <Popover
+       43:         isOpen={open}
+  46   44:         placement='top'
+  47     :         onHide={handleClick}
+  48     :         offset={[5, 5]}
+  49     :         target={triggerRef as React.RefObject<HTMLButtonElement>}
+       45:         onClose={handleClick}
+       46:         offset={5}
+       47:         reference={trigger}
+  50   48:       >
+  51   49:         {({ props }) => (
+  52   50:           <div // eslint-disable-line jsx-a11y/no-noninteractive-element-interactions
+    ...
+  82   80:             />
+  83   81:           </div>
+  84   82:         )}
+  85     :       </Overlay>
+       83:       </Popover>
+  86   84:     </>
+  87   85:   );
+  88   86: };
+Modified regular file app/javascript/mastodon/features/compose/components/emoji_picker_dropdown.jsx:
+    ...
+   6    6: import classNames from 'classnames';
+   7    7: 
+   8    8: import { supportsPassiveEvents } from 'detect-passive-events';
+   9     : import Overlay from 'react-overlays/Overlay';
+  10    9: 
+  11   10: import MoodIcon from '@/material-icons/400-20px/mood.svg?react';
+  12     : import { IconButton } from 'mastodon/components/icon_button';
+       11: import { IconButton } from '@/mastodon/components/icon_button';
+  13   12: import { injectIntl } from '@/mastodon/components/intl';
+       13: import { Popover } from '@/mastodon/components/popover';
+  14   14: 
+  15   15: import { EmojiPicker as EmojiPickerAsync } from '../../ui/util/async-components';
+  16   16: 
+    ...
+ 175  175:     readyToFocus: false,
+ 176  176:   };
+ 177  177: 
+ 178     :   handleDocumentClick = e => {
+ 179     :     if (this.node && !this.node.contains(e.target) && !this.props.pickerButtonRef.contains(e.target)) {
+ 180     :       this.props.onClose();
+ 181     :     }
+ 182     :   };
+ 183     : 
+ 184  178:   componentDidMount() {
+ 185     :     document.addEventListener('click', this.handleDocumentClick, { capture: true });
+ 186     :     document.addEventListener('touchend', this.handleDocumentClick, listenerOptions);
+ 187     : 
+ 188  179:     // Because of https://github.com/react-bootstrap/react-bootstrap/issues/2614 we need
+ 189  180:     // to wait for a frame before focusing
+ 190  181:     requestAnimationFrame(() => {
+    ...
+ 196  187:     });
+ 197  188:   }
+ 198  189: 
+ 199     :   componentWillUnmount() {
+ 200     :     document.removeEventListener('click', this.handleDocumentClick, { capture: true });
+ 201     :     document.removeEventListener('touchend', this.handleDocumentClick, listenerOptions);
+ 202     :   }
+ 203     : 
+ 204  190:   setRef = c => {
+ 205  191:     this.node = c;
+ 206  192:   };
+    ...
+ 307  293:   state = {
+ 308  294:     active: false,
+ 309  295:     loading: false,
+ 310     :     placement: 'bottom',
+      296:     target: null,
+ 311  297:   };
+ 312  298: 
+ 313  299:   setRef = (c) => {
+    ...
+ 344  330:     }
+ 345  331:   };
+ 346  332: 
+ 347     :   handleKeyDown = e => {
+ 348     :     if (e.key === 'Escape') {
+ 349     :       this.onHideDropdown();
+ 350     :     }
+ 351     :   };
+ 352     : 
+ 353  333:   setTargetRef = c => {
+ 354     :     this.target = c;
+ 355     :   };
+ 356     : 
+ 357     :   findTarget = () => {
+ 358     :     return this.target;
+ 359     :   };
+ 360     : 
+ 361     :   handleOverlayEnter = (state) => {
+ 362     :     this.setState({ placement: state.placement });
+      334:     this.setState({ target: c });
+ 363  335:   };
+ 364  336: 
+ 365  337:   render() {
+ 366  338:     const { intl, onPickEmoji, onSkinTone, skinTone, frequentlyUsedEmojis, disabled } = this.props;
+ 367  339:     const title = intl.formatMessage(messages.emoji);
+ 368     :     const { active, loading, placement } = this.state;
+      340:     const { active, loading, target } = this.state;
+ 369  341: 
+ 370  342:     return (
+ 371     :       <div className='emoji-picker-dropdown' onKeyDown={this.handleKeyDown} ref={this.setTargetRef}>
+      343:       <div className='emoji-picker-dropdown' ref={this.setTargetRef}>
+ 372  344:         <IconButton
+ 373  345:           title={title}
+ 374  346:           aria-expanded={active}
+    ...
+ 380  352:           inverted
+ 381  353:         />
+ 382  354: 
+ 383     :         <Overlay show={active} placement={placement} flip target={this.findTarget} popperConfig={{ strategy: 'fixed', onFirstUpdate: this.handleOverlayEnter }}>
+      355:         <Popover
+      356:           isOpen={active}
+      357:           reference={target}
+      358:           onClose={this.onHideDropdown}
+      359:         >
+ 384  360:           {({ props, placement }) => (
+ 385     :             <div {...props} style={{ ...props.style }}>
+ 386     :               <div className={`dropdown-animation ${placement}`}>
+ 387     :                 <EmojiPickerMenu
+ 388     :                   loading={loading}
+ 389     :                   onClose={this.onHideDropdown}
+ 390     :                   onPick={onPickEmoji}
+ 391     :                   onSkinTone={onSkinTone}
+ 392     :                   skinTone={skinTone}
+ 393     :                   frequentlyUsedEmojis={frequentlyUsedEmojis}
+ 394     :                   pickerButtonRef={this.target}
+ 395     :                 />
+ 396     :               </div>
+      361:             <div  {...props} className={`dropdown-animation ${placement}`}>
+      362:               <EmojiPickerMenu
+      363:                 loading={loading}
+      364:                 onClose={this.onHideDropdown}
+      365:                 onPick={onPickEmoji}
+      366:                 onSkinTone={onSkinTone}
+      367:                 skinTone={skinTone}
+      368:                 frequentlyUsedEmojis={frequentlyUsedEmojis}
+      369:                 pickerButtonRef={this.target}
+      370:               />
+ 397  371:             </div>
+ 398  372:           )}
+ 399     :         </Overlay>
+      373:         </Popover>
+ 400  374:       </div>
+ 401  375:     );
+ 402  376:   }
+    ...
+Modified regular file app/javascript/mastodon/features/compose/components/language_dropdown.tsx:
+    ...
+   8    8: import { Map as ImmutableMap } from 'immutable';
+   9    9: 
+  10   10: import fuzzysort from 'fuzzysort';
+  11     : import Overlay from 'react-overlays/Overlay';
+  12     : import type { State, Placement } from 'react-overlays/usePopper';
+  13   11: 
+       12: import { Popover } from '@/mastodon/components/popover';
+  14   13: import CancelIcon from '@/material-icons/400-24px/cancel-fill.svg?react';
+  15   14: import SearchIcon from '@/material-icons/400-24px/search.svg?react';
+  16   15: import TranslateIcon from '@/material-icons/400-24px/translate.svg?react';
+    ...
+ 203  202:   const isSearching = searchValue !== '';
+ 204  203: 
+ 205  204:   useEffect(() => {
+ 206     :     const handleDocumentClick = (e: MouseEvent) => {
+ 207     :       if (
+ 208     :         nodeRef.current &&
+ 209     :         e.target instanceof HTMLElement &&
+ 210     :         !nodeRef.current.contains(e.target)
+ 211     :       ) {
+ 212     :         onClose();
+ 213     :         e.stopPropagation();
+ 214     :       }
+ 215     :     };
+ 216     : 
+ 217     :     document.addEventListener('click', handleDocumentClick, { capture: true });
+ 218     : 
+ 219     :     // Because of https://github.com/react-bootstrap/react-bootstrap/issues/2614 we need
+ 220     :     // to wait for a frame before focusing
+ 221     :     requestAnimationFrame(() => {
+ 222     :       if (nodeRef.current) {
+ 223     :         const element = nodeRef.current.querySelector<HTMLInputElement>(
+ 224     :           'input[type="search"]',
+ 225     :         );
+ 226     :         if (element) element.focus();
+ 227     :       }
+ 228     :     });
+ 229     : 
+ 230     :     return () => {
+ 231     :       document.removeEventListener('click', handleDocumentClick);
+ 232     :     };
+ 233     :   }, [onClose]);
+      205:     if (nodeRef.current) {
+      206:       const element = nodeRef.current.querySelector<HTMLInputElement>(
+      207:         'input[type="search"]',
+      208:       );
+      209:       if (element) element.focus();
+      210:     }
+      211:   }, []);
+ 234  212: 
+ 235  213:   const results = useMemo(() => {
+ 236  214:     if (searchValue === '') {
+    ...
+ 326  304: 
+ 327  305: export const LanguageDropdown: React.FC = () => {
+ 328  306:   const [open, setOpen] = useState(false);
+ 329     :   const [placement, setPlacement] = useState<Placement | undefined>('bottom');
+ 330  307:   const [guess, setGuess] = useState('');
+ 331     :   const activeElementRef = useRef<HTMLElement>(null);
+ 332     :   const targetRef = useRef<HTMLButtonElement>(null);
+      308:   const activeElementRef = useRef<HTMLElement | null>(null);
+      309:   const [targetElement, setTargetElement] = useState<HTMLElement | null>(null);
+ 333  310: 
+ 334  311:   const intl = useIntl();
+ 335  312: 
+    ...
+ 369  346:     [dispatch],
+ 370  347:   );
+ 371  348: 
+ 372     :   const handleOverlayEnter = useCallback(
+ 373     :     (state: Partial<State>) => {
+ 374     :       setPlacement(state.placement);
+ 375     :     },
+ 376     :     [setPlacement],
+ 377     :   );
+ 378     : 
+ 379  349:   useEffect(() => {
+ 380  350:     if (isTextLongEnoughForGuess(text)) {
+ 381  351:       debouncedGuess(text, setGuess);
+    ...
+ 402  372:     <>
+ 403  373:       <button
+ 404  374:         type='button'
+ 405     :         ref={targetRef}
+      375:         ref={setTargetElement}
+ 406  376:         title={intl.formatMessage(messages.changeLanguage)}
+ 407  377:         aria-expanded={open}
+ 408  378:         onClick={handleToggle}
+    ...
+ 416  386:         <span className='dropdown-button__label'>{current[2] ?? value}</span>
+ 417  387:       </button>
+ 418  388: 
+ 419     :       <Overlay
+ 420     :         show={open}
+ 421     :         offset={[5, 5]}
+ 422     :         placement={placement}
+ 423     :         flip
+ 424     :         target={targetRef as React.RefObject<HTMLButtonElement>}
+ 425     :         popperConfig={{ strategy: 'fixed', onFirstUpdate: handleOverlayEnter }}
+      389:       <Popover
+      390:         isOpen={open}
+      391:         onClose={handleClose}
+      392:         offset={5}
+      393:         reference={targetElement}
+ 426  394:       >
+ 427  395:         {({ props, placement }) => (
+ 428  396:           <div {...props}>
+    ...
+ 438  406:             </div>
+ 439  407:           </div>
+ 440  408:         )}
+ 441     :       </Overlay>
+      409:       </Popover>
+ 442  410:     </>
+ 443  411:   );
+ 444  412: };
+Modified regular file app/javascript/mastodon/features/compose/components/privacy_dropdown.tsx:
+    ...
+   4    4: 
+   5    5: import classNames from 'classnames';
+   6    6: 
+   7     : import type { OverlayProps } from 'react-overlays/Overlay';
+   8     : import Overlay from 'react-overlays/Overlay';
+   9     : 
+  10    7: import type { StatusVisibility } from '@/mastodon/api_types/statuses';
+        8: import { Popover } from '@/mastodon/components/popover';
+  11    9: import AlternateEmailIcon from '@/material-icons/400-24px/alternate_email.svg?react';
+  12   10: import LockIcon from '@/material-icons/400-24px/lock.svg?react';
+  13   11: import PublicIcon from '@/material-icons/400-24px/public.svg?react';
+    ...
+  58   56:   value: StatusVisibility;
+  59   57:   onChange: (value: StatusVisibility) => void;
+  60   58:   noDirect?: boolean;
+  61     :   container?: OverlayProps['container'];
+  62   59:   disabled?: boolean;
+  63   60: }
+  64   61: 
+  65   62: const PrivacyDropdown: React.FC<PrivacyDropdownProps> = ({
+  66   63:   value,
+  67   64:   onChange,
+  68   65:   noDirect,
+  69     :   container,
+  70   66:   disabled,
+  71   67: }) => {
+  72   68:   const intl = useIntl();
+  73     :   const overlayTargetRef = useRef<HTMLDivElement>(null);
+       69:   const [popoverTarget, setPopoverTarget] = useState<HTMLDivElement | null>(
+       70:     null,
+       71:   );
+  74   72:   const previousFocusTargetRef = useRef<HTMLElement>(null);
+  75   73:   const [isOpen, setIsOpen] = useState(false);
+  76   74: 
+    ...
+ 142  140:     options.find((item) => item.value === value) ?? options.at(0);
+ 143  141: 
+ 144  142:   return (
+ 145     :     <div ref={overlayTargetRef}>
+      143:     <div ref={setPopoverTarget}>
+ 146  144:       <button
+ 147  145:         type='button'
+ 148  146:         title={intl.formatMessage(messages.change_privacy)}
+    ...
+ 166  164:         )}
+ 167  165:       </button>
+ 168  166: 
+ 169     :       <Overlay
+ 170     :         show={isOpen}
+ 171     :         offset={[5, 5]}
+ 172     :         placement='bottom'
+ 173     :         flip
+ 174     :         target={overlayTargetRef as React.RefObject<HTMLDivElement>}
+ 175     :         container={container}
+ 176     :         popperConfig={{ strategy: 'fixed' }}
+      167:       <Popover
+      168:         isOpen={isOpen}
+      169:         offset={5}
+      170:         reference={popoverTarget}
+      171:         onClose={handleClose}
+ 177  172:       >
+ 178  173:         {({ props, placement }) => (
+ 179  174:           <div {...props}>
+    ...
+ 190  185:             </div>
+ 191  186:           </div>
+ 192  187:         )}
+ 193     :       </Overlay>
+      188:       </Popover>
+ 194  189:     </div>
+ 195  190:   );
+ 196  191: };
+    ...
+Modified regular file app/javascript/mastodon/features/notifications/components/select_with_label.tsx:
+   1    1: import type { PropsWithChildren } from 'react';
+   2     : import { useCallback, useState, useRef, useId } from 'react';
+        2: import { useCallback, useState, useId } from 'react';
+   3    3: 
+   4    4: import classNames from 'classnames';
+   5    5: 
+   6     : import type { Placement, State as PopperState } from '@popperjs/core';
+   7     : import Overlay from 'react-overlays/Overlay';
+   8     : 
+        6: import { Popover } from '@/mastodon/components/popover';
+   9    7: import ArrowDropDownIcon from '@/material-icons/400-24px/arrow_drop_down.svg?react';
+  10    8: import type { SelectItem } from 'mastodon/components/dropdown_selector';
+  11    9: import { DropdownSelector } from 'mastodon/components/dropdown_selector';
+    ...
+  18   16:   onChange: (value: string) => void;
+  19   17:   'aria-labelledby': string;
+  20   18:   'aria-describedby'?: string;
+  21     :   placement?: Placement;
+  22   19: }
+  23   20: 
+  24   21: const Dropdown: React.FC<DropdownProps> = ({
+    ...
+  28   25:   onChange,
+  29   26:   'aria-labelledby': ariaLabelledBy,
+  30   27:   'aria-describedby': ariaDescribedBy,
+  31     :   placement: initialPlacement = 'bottom-end',
+  32   28: }) => {
+  33     :   const containerRef = useRef<HTMLDivElement>(null);
+  34     :   const buttonRef = useRef<HTMLButtonElement>(null);
+       29:   const [buttonElement, setButtonElement] = useState<HTMLButtonElement | null>(
+       30:     null,
+       31:   );
+  35   32:   const [isOpen, setOpen] = useState<boolean>(false);
+  36     :   const [placement, setPlacement] = useState<Placement>(initialPlacement);
+  37   33:   const uniqueId = useId();
+  38   34:   const menuId = `${uniqueId}-menu`;
+  39   35:   const buttonLabelId = `${uniqueId}-button`;
+  40   36: 
+  41   37:   const handleClose = useCallback(() => {
+  42     :     if (isOpen && buttonRef.current) {
+  43     :       buttonRef.current.focus({ preventScroll: true });
+       38:     if (isOpen && buttonElement) {
+       39:       buttonElement.focus({ preventScroll: true });
+  44   40:     }
+  45   41:     setOpen(false);
+  46     :   }, [isOpen]);
+       42:   }, [isOpen, buttonElement]);
+  47   43: 
+  48   44:   const handleToggle = useCallback(() => {
+  49   45:     if (isOpen) {
+    ...
+  53   49:     }
+  54   50:   }, [isOpen, handleClose]);
+  55   51: 
+  56     :   const handleOverlayEnter = useCallback(
+  57     :     (state: Partial<PopperState>) => {
+  58     :       if (state.placement) setPlacement(state.placement);
+  59     :     },
+  60     :     [setPlacement],
+  61     :   );
+  62     : 
+  63   52:   const valueOption = options.find((item) => item.value === value);
+  64   53: 
+  65   54:   return (
+  66     :     <div ref={containerRef}>
+       55:     <div>
+  67   56:       <button
+  68   57:         type='button'
+  69     :         ref={buttonRef}
+       58:         ref={setButtonElement}
+  70   59:         onClick={handleToggle}
+  71   60:         disabled={disabled}
+  72   61:         aria-expanded={isOpen}
+    ...
+  81   70:         <Icon id='down' icon={ArrowDropDownIcon} />
+  82   71:       </button>
+  83   72: 
+  84     :       <Overlay
+  85     :         show={isOpen}
+  86     :         offset={[5, 5]}
+  87     :         placement={placement}
+  88     :         flip
+  89     :         target={containerRef as React.RefObject<HTMLDivElement>}
+  90     :         popperConfig={{ strategy: 'fixed', onFirstUpdate: handleOverlayEnter }}
+       73:       <Popover
+       74:         isOpen={isOpen}
+       75:         offset={5}
+       76:         placement='bottom-end'
+       77:         reference={buttonElement}
+       78:         onClose={handleClose}
+  91   79:       >
+  92   80:         {({ props, placement }) => (
+  93     :           <div {...props} id={menuId}>
+  94     :             <div
+  95     :               className={`dropdown-animation privacy-dropdown__dropdown ${placement}`}
+  96     :             >
+  97     :               <DropdownSelector
+  98     :                 items={options}
+  99     :                 value={value}
+ 100     :                 onClose={handleClose}
+ 101     :                 onChange={onChange}
+ 102     :                 classNamePrefix='privacy-dropdown'
+ 103     :               />
+ 104     :             </div>
+       81:           <div
+       82:             {...props}
+       83:             id={menuId}
+       84:             className={`dropdown-animation privacy-dropdown__dropdown ${placement}`}
+       85:           >
+       86:             <DropdownSelector
+       87:               items={options}
+       88:               value={value}
+       89:               onClose={handleClose}
+       90:               onChange={onChange}
+       91:               classNamePrefix='privacy-dropdown'
+       92:             />
+ 105   93:           </div>
+ 106   94:         )}
+ 107     :       </Overlay>
+       95:       </Popover>
+ 108   96:     </div>
+ 109   97:   );
+ 110   98: };
+    ...
+Modified regular file app/javascript/mastodon/features/ui/components/boost_modal.tsx:
+    ...
+  52   52:     onClose();
+  53   53:   }, [onClose]);
+  54   54: 
+  55     :   const findContainer = useCallback(
+  56     :     () =>
+  57     :       document.getElementsByClassName(
+  58     :         'modal-root__container',
+  59     :       )[0] as HTMLDivElement,
+  60     :     [],
+  61     :   );
+  62     : 
+  63   55:   return (
+  64   56:     <div className='modal-root__modal safety-action-modal'>
+  65   57:       <div className='safety-action-modal__top'>
+    ...
+ 109  101:             <PrivacyDropdown
+ 110  102:               noDirect
+ 111  103:               value={privacy}
+ 112     :               container={findContainer}
+ 113  104:               onChange={onPrivacyChange}
+ 114  105:               disabled={statusVisibility === 'private'}
+ 115  106:             />
+    ...
+Modified regular file app/javascript/mastodon/features/ui/components/hashtag_menu_controller.tsx:
+    ...
+   4    4: 
+   5    5: import { useLocation } from 'react-router-dom';
+   6    6: 
+   7     : import type {
+   8     :   OffsetValue,
+   9     :   UsePopperOptions,
+  10     : } from 'react-overlays/esm/usePopper';
+  11     : import Overlay from 'react-overlays/Overlay';
+  12     : 
+  13    7: import { DropdownMenu } from 'mastodon/components/dropdown_menu';
+        8: import { Popover } from 'mastodon/components/popover';
+  14    9: import { useIdentity } from 'mastodon/identity_context';
+  15   10: import type { MenuItem } from 'mastodon/models/dropdown_menu';
+  16   11: import { useAppSelector } from 'mastodon/store';
+    ...
+  27   22:   muteHashtag: { id: 'hashtag.mute', defaultMessage: 'Mute #{hashtag}' },
+  28   23: });
+  29   24: 
+  30     : const offset = [5, 5] as OffsetValue;
+  31     : const popperConfig = { strategy: 'fixed' } as UsePopperOptions;
+  32     : 
+  33   25: const isHashtagLink = (
+  34   26:   element: HTMLAnchorElement | null,
+  35   27: ): element is HTMLAnchorElement => {
+    ...
+ 135  127:   }
+ 136  128: 
+ 137  129:   return (
+ 138     :     <Overlay
+ 139     :       show={open}
+ 140     :       offset={offset}
+ 141     :       placement='bottom'
+ 142     :       flip
+ 143     :       target={element}
+ 144     :       popperConfig={popperConfig}
+ 145     :     >
+ 146     :       {({ props, arrowProps, placement }) => (
+ 147     :         <div {...props}>
+ 148     :           <div className={`dropdown-animation dropdown-menu ${placement}`}>
+ 149     :             <div
+ 150     :               className={`dropdown-menu__arrow ${placement}`}
+ 151     :               {...arrowProps}
+ 152     :             />
+ 153     : 
+ 154     :             <DropdownMenu
+ 155     :               items={menu}
+ 156     :               onClose={handleClose}
+ 157     :               openedViaKeyboard={false}
+ 158     :             />
+ 159     :           </div>
+      130:     <Popover isOpen={open} offset={5} reference={element} onClose={handleClose}>
+      131:       {({ props, placement }) => (
+      132:         <div
+      133:           {...props}
+      134:           className={`dropdown-animation dropdown-menu ${placement}`}
+      135:         >
+      136:           <DropdownMenu
+      137:             items={menu}
+      138:             onClose={handleClose}
+      139:             openedViaKeyboard={false}
+      140:           />
+ 160  141:         </div>
+ 161  142:       )}
+ 162     :     </Overlay>
+      143:     </Popover>
+ 163  144:   );
+ 164  145: };
+Modified regular file app/javascript/mastodon/hooks/useOnClickOutside.ts:
+    ...
+   3    3:  */
+   4    4: 
+   5    5: import type { RefObject } from 'react';
+   6     : import { useEffect } from 'react';
+        6: import { useEffect, useEffectEvent } from 'react';
+   7    7: 
+   8     : type ElementRef = RefObject<HTMLElement | null>;
+        8: type PlainElement = Element | null;
+        9: type ElementOrRef = PlainElement | RefObject<PlainElement>;
+   9   10: 
+  10   11: export function useOnClickOutside(
+  11     :   excludedElementRef: ElementRef | ElementRef[] | null,
+       12:   excludedElement: ElementOrRef | ElementOrRef[],
+  12   13:   onClick: (e: MouseEvent) => void,
+  13   14:   enabled = true,
+  14   15: ) {
+       16:   const handleClickOutside = useEffectEvent((event: MouseEvent) => {
+       17:     const excludedRefs = Array.isArray(excludedElement)
+       18:       ? excludedElement
+       19:       : [excludedElement];
+       20: 
+       21:     for (const ref of excludedRefs) {
+       22:       const excludedElement = ref instanceof Element ? ref : ref?.current;
+       23: 
+       24:       // Bail out if the clicked element or the currently focused element
+       25:       // is inside of excludedElement. We're also checking the focused element
+       26:       // to prevent an issue in Chrome where initiating a drag inside of an
+       27:       // input (to select the text inside of it) and ending that drag outside
+       28:       // of the input fires a click event, breaking our excludedElement rule.
+       29:       if (
+       30:         excludedElement &&
+       31:         (excludedElement === event.target ||
+       32:           excludedElement === document.activeElement ||
+       33:           excludedElement.contains(event.target as Node) ||
+       34:           excludedElement.contains(document.activeElement))
+       35:       ) {
+       36:         return;
+       37:       }
+       38:     }
+       39: 
+       40:     onClick(event);
+       41:   });
+       42: 
+  15   43:   useEffect(() => {
+  16     :     // If the search popover is expanded, close it when tabbing or
+  17     :     // clicking outside of it or the search form, while allowing
+  18     :     // tabbing or clicking inside of the popover
+  19   44:     if (enabled) {
+  20     :       function handleClickOutside(event: MouseEvent) {
+  21     :         const excludedRefs = Array.isArray(excludedElementRef)
+  22     :           ? excludedElementRef
+  23     :           : [excludedElementRef];
+  24     : 
+  25     :         for (const ref of excludedRefs) {
+  26     :           const excludedElement = ref?.current;
+  27     : 
+  28     :           // Bail out if the clicked element or the currently focused element
+  29     :           // is inside of excludedElement. We're also checking the focused element
+  30     :           // to prevent an issue in Chrome where initiating a drag inside of an
+  31     :           // input (to select the text inside of it) and ending that drag outside
+  32     :           // of the input fires a click event, breaking our excludedElement rule.
+  33     :           if (
+  34     :             excludedElement &&
+  35     :             (excludedElement === event.target ||
+  36     :               excludedElement === document.activeElement ||
+  37     :               excludedElement.contains(event.target as Node) ||
+  38     :               excludedElement.contains(document.activeElement))
+  39     :           ) {
+  40     :             return;
+  41     :           }
+  42     :         }
+  43     : 
+  44     :         onClick(event);
+  45     :       }
+  46     : 
+  47   45:       document.addEventListener('click', handleClickOutside);
+  48   46: 
+  49   47:       return () => {
+  50   48:         document.removeEventListener('click', handleClickOutside);
+  51   49:       };
+  52   50:     }
+  53   51:     return () => null;
+  54     :   }, [enabled, excludedElementRef, onClick]);
+       52:   }, [enabled, excludedElement, onClick]);
+  55   53: }
+Modified regular file app/javascript/styles/mastodon/components.scss:
+    ...
+ 372  372:   }
+ 373  373: }
+ 374  374: 
+ 375     : body > [data-popper-placement] {
+      375: body > [data-popover-placement] {
+ 376  376:   z-index: 9999;
+ 377  377: }
+ 378  378: 
+    ...
+5771 5771: }
+5772 5772: 
+5773 5773: .visibility-dropdown {
+5774     :   &__overlay[data-popper-placement] {
+5775     :     z-index: 9999;
+5776     :   }
+5777     : 
+5778 5774:   &.disabled {
+5779 5775:     opacity: 0.6;
+5780 5776:     cursor: default;
+    ...
+10714 10710:   }
+10715 10711: }
+10716 10712: 
+10717     : .hover-card-controller[data-popper-reference-hidden='true'] {
+     10713: .hover-card-controller[data-popover-reference-hidden='true'] {
+10718 10714:   opacity: 0;
+10719 10715:   pointer-events: none;
+10720 10716: }
+    ...
+Modified regular file package.json:
+    ...
+  45   45:     "@dnd-kit/modifiers": "^9.0.0",
+  46   46:     "@dnd-kit/sortable": "^10.0.0",
+  47   47:     "@dnd-kit/utilities": "^3.2.2",
+       48:     "@floating-ui/react-dom": "^2.1.8",
+  48   49:     "@formatjs/intl-pluralrules": "^6.0.0",
+  49   50:     "@formatjs/unplugin": "^1.1.5",
+  50   51:     "@gamestdio/websocket": "^0.3.2",
+    ...
+  97   98:     "react-immutable-proptypes": "^2.2.0",
+  98   99:     "react-immutable-pure-component": "^2.2.2",
+  99  100:     "react-intl": "^10.0.0",
+ 100     :     "react-overlays": "^5.2.1",
+ 101  101:     "react-redux": "^9.0.4",
+ 102  102:     "react-redux-loading-bar": "^5.0.8",
+ 103  103:     "react-router": "^5.3.4",
+    ...
+Modified regular file yarn.lock:
+    ...
+1141 1141:   languageName: node
+1142 1142:   linkType: hard
+1143 1143: 
+1144     : "@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.12.0, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.13.8, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.20.13, @babel/runtime@npm:^7.3.1, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.6.3, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
+     1144: "@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.12.0, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.20.13, @babel/runtime@npm:^7.3.1, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
+1145 1145:   version: 7.27.0
+1146 1146:   resolution: "@babel/runtime@npm:7.27.0"
+1147 1147:   dependencies:
+    ...
+2437 2437:   languageName: node
+2438 2438:   linkType: hard
+2439 2439: 
+     2440: "@floating-ui/core@npm:^1.7.5":
+     2441:   version: 1.7.5
+     2442:   resolution: "@floating-ui/core@npm:1.7.5"
+     2443:   dependencies:
+     2444:     "@floating-ui/utils": "npm:^0.2.11"
+     2445:   checksum: 10c0/f9c52205e198b231d63a387b09c659aab08c46a1899e0b0bbe147b8b4f048b546f15ba17cb5d2a471da9534f1883d979425e13e5c4ceee67be63e4b0abd4db5d
+     2446:   languageName: node
+     2447:   linkType: hard
+     2448: 
+2440 2449: "@floating-ui/dom@npm:^1.0.1":
+2441 2450:   version: 1.5.3
+2442 2451:   resolution: "@floating-ui/dom@npm:1.5.3"
+    ...
+2447 2456:   languageName: node
+2448 2457:   linkType: hard
+2449 2458: 
+     2459: "@floating-ui/dom@npm:^1.7.6":
+     2460:   version: 1.7.6
+     2461:   resolution: "@floating-ui/dom@npm:1.7.6"
+     2462:   dependencies:
+     2463:     "@floating-ui/core": "npm:^1.7.5"
+     2464:     "@floating-ui/utils": "npm:^0.2.11"
+     2465:   checksum: 10c0/5c098e0d7b58c9bc769f276cca1766994c2c9c70c92d091a61bba8b3e9be53c011e0a79a8457fc2fb2f3d91697a26eb52e0a4962ef936dc963b45f58613c212f
+     2466:   languageName: node
+     2467:   linkType: hard
+     2468: 
+     2469: "@floating-ui/react-dom@npm:^2.1.8":
+     2470:   version: 2.1.8
+     2471:   resolution: "@floating-ui/react-dom@npm:2.1.8"
+     2472:   dependencies:
+     2473:     "@floating-ui/dom": "npm:^1.7.6"
+     2474:   peerDependencies:
+     2475:     react: ">=16.8.0"
+     2476:     react-dom: ">=16.8.0"
+     2477:   checksum: 10c0/26260ca4bb23b57c73b824062505abf977a008ce6e0463bdacca74f7e49853c4cd1d2bbf1a77c6caa17fa37dfffda2c6c4cd07a8737ebd7474aaff7818401d75
+     2478:   languageName: node
+     2479:   linkType: hard
+     2480: 
+2450 2481: "@floating-ui/utils@npm:^0.1.3":
+2451 2482:   version: 0.1.6
+2452 2483:   resolution: "@floating-ui/utils@npm:0.1.6"
+2453 2484:   checksum: 10c0/0a089db0e0526b89e83cb0a773a903517db5c9067cd473febfd8fa91a3a2ccbc3a835234796c1bb528def21dbb67be50e28d9c473cb58a6d90679d7e549b9c0c
+2454 2485:   languageName: node
+2455 2486:   linkType: hard
+2456 2487: 
+     2488: "@floating-ui/utils@npm:^0.2.11":
+     2489:   version: 0.2.11
+     2490:   resolution: "@floating-ui/utils@npm:0.2.11"
+     2491:   checksum: 10c0/f4bcea1559bdbb721ecc8e8ead423ac58d6a5b6e70b602cf0810ba6ad4ed1c77211b207faa88b278a9042f0c743133de08a203ed6741c1b6443423332884d5b3
+     2492:   languageName: node
+     2493:   linkType: hard
+     2494: 
+2457 2495: "@formatjs/bigdecimal@npm:0.2.0":
+2458 2496:   version: 0.2.0
+2459 2497:   resolution: "@formatjs/bigdecimal@npm:0.2.0"
+    ...
+2899 2937:     "@dnd-kit/sortable": "npm:^10.0.0"
+2900 2938:     "@dnd-kit/utilities": "npm:^3.2.2"
+2901 2939:     "@eslint/js": "npm:^9.39.2"
+     2940:     "@floating-ui/react-dom": "npm:^2.1.8"
+2902 2941:     "@formatjs/cli": "npm:^6.1.1"
+2903 2942:     "@formatjs/intl-pluralrules": "npm:^6.0.0"
+2904 2943:     "@formatjs/unplugin": "npm:^1.1.5"
+    ...
+3000 3039:     react-immutable-proptypes: "npm:^2.2.0"
+3001 3040:     react-immutable-pure-component: "npm:^2.2.2"
+3002 3041:     react-intl: "npm:^10.0.0"
+3003     :     react-overlays: "npm:^5.2.1"
+3004 3042:     react-redux: "npm:^9.0.4"
+3005 3043:     react-redux-loading-bar: "npm:^5.0.8"
+3006 3044:     react-router: "npm:^5.3.4"
+    ...
+3837 3875:   languageName: node
+3838 3876:   linkType: hard
+3839 3877: 
+3840     : "@popperjs/core@npm:^2.11.6":
+3841     :   version: 2.11.8
+3842     :   resolution: "@popperjs/core@npm:2.11.8"
+3843     :   checksum: 10c0/4681e682abc006d25eb380d0cf3efc7557043f53b6aea7a5057d0d1e7df849a00e281cd8ea79c902a35a414d7919621fc2ba293ecec05f413598e0b23d5a1e63
+3844     :   languageName: node
+3845     :   linkType: hard
+3846     : 
+3847 3878: "@react-spring/animated@npm:~10.1.1":
+3848 3879:   version: 10.1.1
+3849 3880:   resolution: "@react-spring/animated@npm:10.1.1"
+    ...
+3933 3964:   languageName: node
+3934 3965:   linkType: hard
+3935 3966: 
+3936     : "@restart/hooks@npm:^0.4.7":
+3937     :   version: 0.4.9
+3938     :   resolution: "@restart/hooks@npm:0.4.9"
+3939     :   dependencies:
+3940     :     dequal: "npm:^2.0.2"
+3941     :   peerDependencies:
+3942     :     react: ">=16.8.0"
+3943     :   checksum: 10c0/2f34918bc3174a399b9d7f0f43abec505a494da33f787e612581a35b71fdc3ca5064772e991ac4a6991db31ce3e1fde0e1facbe24e80489a44e1a09f79d7a619
+3944     :   languageName: node
+3945     :   linkType: hard
+3946     : 
+3947 3967: "@rolldown/binding-android-arm64@npm:1.0.3":
+3948 3968:   version: 1.0.3
+3949 3969:   resolution: "@rolldown/binding-android-arm64@npm:1.0.3"
+    ...
+4878 4898:   languageName: node
+4879 4899:   linkType: hard
+4880 4900: 
+4881     : "@types/react@npm:*, @types/react@npm:>=16.9.11, @types/react@npm:^19.2.0":
+     4901: "@types/react@npm:*, @types/react@npm:^19.2.0":
+4882 4902:   version: 19.2.17
+4883 4903:   resolution: "@types/react@npm:19.2.17"
+4884 4904:   dependencies:
+    ...
+4945 4965:   languageName: node
+4946 4966:   linkType: hard
+4947 4967: 
+4948     : "@types/warning@npm:^3.0.0":
+4949     :   version: 3.0.2
+4950     :   resolution: "@types/warning@npm:3.0.2"
+4951     :   checksum: 10c0/84b76cea7b9455bd2a47129f27a5be1cc7a33f54466930abb3c220c93bbeae997c8b08a7b8d6569152a2f8b615b5b865bf4548556c09d2c61ca356a888bc522c
+4952     :   languageName: node
+4953     :   linkType: hard
+4954     : 
+4955 4968: "@types/ws@npm:^8.5.9":
+4956 4969:   version: 8.18.1
+4957 4970:   resolution: "@types/ws@npm:8.18.1"
+    ...
+6962 6975:   languageName: node
+6963 6976:   linkType: hard
+6964 6977: 
+6965     : "dequal@npm:^2.0.2, dequal@npm:^2.0.3":
+     6978: "dequal@npm:^2.0.3":
+6966 6979:   version: 2.0.3
+6967 6980:   resolution: "dequal@npm:2.0.3"
+6968 6981:   checksum: 10c0/f98860cdf58b64991ae10205137c0e97d384c3a4edc7f807603887b7c4b850af1224a33d88012009f150861cbee4fa2d322c4cc04b9313bee312e47f6ecaa888
+    ...
+7055 7068:   languageName: node
+7056 7069:   linkType: hard
+7057 7070: 
+7058     : "dom-helpers@npm:^5.0.1, dom-helpers@npm:^5.1.4, dom-helpers@npm:^5.2.0":
+     7071: "dom-helpers@npm:^5.0.1, dom-helpers@npm:^5.1.4":
+7059 7072:   version: 5.2.1
+7060 7073:   resolution: "dom-helpers@npm:5.2.1"
+7061 7074:   dependencies:
+    ...
+12179 12192:   languageName: node
+12180 12193:   linkType: hard
+12181 12194: 
+12182     : "react-overlays@npm:^5.2.1":
+12183     :   version: 5.2.1
+12184     :   resolution: "react-overlays@npm:5.2.1"
+12185     :   dependencies:
+12186     :     "@babel/runtime": "npm:^7.13.8"
+12187     :     "@popperjs/core": "npm:^2.11.6"
+12188     :     "@restart/hooks": "npm:^0.4.7"
+12189     :     "@types/warning": "npm:^3.0.0"
+12190     :     dom-helpers: "npm:^5.2.0"
+12191     :     prop-types: "npm:^15.7.2"
+12192     :     uncontrollable: "npm:^7.2.1"
+12193     :     warning: "npm:^4.0.3"
+12194     :   peerDependencies:
+12195     :     react: ">=16.3.0"
+12196     :     react-dom: ">=16.3.0"
+12197     :   checksum: 10c0/61836490040cfcdebc792b6eddcfac47b7b7e159f99304165371e9eb389a6875f20ddba3433421413ccfb918e8da6042ab2829f9b1f6f5dd9f8476aa16ddcfbe
+12198     :   languageName: node
+12199     :   linkType: hard
+12200     : 
+12201 12195: "react-redux-loading-bar@npm:^5.0.8":
+12202 12196:   version: 5.0.8
+12203 12197:   resolution: "react-redux-loading-bar@npm:5.0.8"
+    ...
+14330 14324:   languageName: node
+14331 14325:   linkType: hard
+14332 14326: 
+14333     : "uncontrollable@npm:^7.2.1":
+14334     :   version: 7.2.1
+14335     :   resolution: "uncontrollable@npm:7.2.1"
+14336     :   dependencies:
+14337     :     "@babel/runtime": "npm:^7.6.3"
+14338     :     "@types/react": "npm:>=16.9.11"
+14339     :     invariant: "npm:^2.2.4"
+14340     :     react-lifecycles-compat: "npm:^3.0.4"
+14341     :   peerDependencies:
+14342     :     react: ">=15.0.0"
+14343     :   checksum: 10c0/81473e892027a99f1ead6b9afd16db65097651cd36c4b6db710728f206f1fc4b82ba9170ecb4a1127a23857e01ba51c0194d0a7cfeecfea61ba9418e0276cb56
+14344     :   languageName: node
+14345     :   linkType: hard
+14346     : 
+14347 14327: "undici-types@npm:~7.16.0":
+14348 14328:   version: 7.16.0
+14349 14329:   resolution: "undici-types@npm:7.16.0"
+    ...
+14815 14795:   languageName: node
+14816 14796:   linkType: hard
+14817 14797: 
+14818     : "warning@npm:^4.0.3":
+14819     :   version: 4.0.3
+14820     :   resolution: "warning@npm:4.0.3"
+14821     :   dependencies:
+14822     :     loose-envify: "npm:^1.0.0"
+14823     :   checksum: 10c0/aebab445129f3e104c271f1637fa38e55eb25f968593e3825bd2f7a12bd58dc3738bb70dc8ec85826621d80b4acfed5a29ebc9da17397c6125864d72301b937e
+14824     :   languageName: node
+14825     :   linkType: hard
+14826     : 
+14827 14798: "wasm-feature-detect@npm:^1.8.0":
+14828 14799:   version: 1.8.0
+14829 14800:   resolution: "wasm-feature-detect@npm:1.8.0"
+    ...
